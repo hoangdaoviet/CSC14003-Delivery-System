@@ -1,0 +1,17 @@
+# To-do List
+
+## Deadline: T6 19/6
+Trân
+- [] Cài đặt DFS
+
+Kha
+- [] Cài đặt GBFS
+- [] Cài đặt BFS
+
+Phát
+- [] Cài đặt UCS
+- [] Cài đặt A*
+
+Hoàng
+- [] Cài đặt level 2
+- [] Cài đặt GUI

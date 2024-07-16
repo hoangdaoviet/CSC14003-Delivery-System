@@ -1,19 +1,48 @@
-class Agent:
+class PlayerLvl1:
     def __init__(self):
         pass
 
-class PlayerLvl1(Agent):
-    def __init__(self):
+    def BFS(self, board):
+        """
+        input: board: list(list()), a 2D list representing the map
+        output: result: list((x, y)), a list of strings representing the moves on the coordinate
+        delete pass statement before implementing
+        """
         pass
 
-    def move(self, board):
+    def DFS(self, board):
         """
-        input: list(list()), a 2D list representing the map
-        output: list((x, y)), a list of strings representing the moves on the coordinate
+        input: board: list(list()), a 2D list representing the map
+        output: result: list((x, y)), a list of strings representing the moves on the coordinate
+        delete pass statement before implementing
         """
-        return []
+        pass
 
-class PlayerLvl2(Agent):
+    def UCS(self, board):
+        """
+        input: board: list(list()), a 2D list representing the map
+        output: result: list((x, y)), a list of strings representing the moves on the coordinate
+        delete pass statement before implementing
+        """
+        pass
+
+    def GBFS(self, board):
+        """
+        input: board: list(list()), a 2D list representing the map
+        output: result: list((x, y)), a list of strings representing the moves on the coordinate
+        delete pass statement before implementing
+        """
+        pass
+    
+    def AStar(self, board):
+        """
+        input: board: list(list()), a 2D list representing the map
+        output: result: list((x, y)), a list of strings representing the moves on the coordinate
+        delete pass statement before implementing
+        """
+        pass
+
+class PlayerLvl2:
     def __init__(self, timeAllowed):
         self.timeAllowed = timeAllowed
 
@@ -24,7 +53,7 @@ class PlayerLvl2(Agent):
         """
         return []
 
-class PlayerLvl3(Agent):
+class PlayerLvl3:
     def __init__(self, timeAllowed, fuelCapacity):
         self.timeAllowed = timeAllowed
         self.fuelCapacity = fuelCapacity
