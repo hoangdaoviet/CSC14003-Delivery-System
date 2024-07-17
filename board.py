@@ -1,14 +1,12 @@
 class Board:
     def __init__(self, filename):
         try:
-            f = open(filename, 'r')
+            with open(filename, 'r') as f:
+                self.n, self.m, self.t, self.f = map(int, f.readline().split())
+                self.board = [list(map(str, f.readline().split())) for _ in range(self.n)]
         except FileNotFoundError:
             print('File not found')
             exit()
-
-        self.n, self.m, self.t, self.f = map(int, f.readline().split())
-        self.board = [list(map(str, f.readline().split())) for _ in range(self.n)]
-        f.close()
 
         self.index, self.level = self.extractInformation(filename)
         self.start = self.findStart()
@@ -34,6 +32,9 @@ class Board:
                 if self.board[i][j] == 'G':
                     return (i, j)
         return None
+    
+    def isValid(self, x, y):
+        return 0 <= x < self.n and 0 <= y < self.m and self.board[x][y] != '-1'
     
 class Node:
     __slots__ = ['x', 'y', 'parent', 'cost', 'time', 'fuel']
