@@ -36,6 +36,7 @@ class Board:
         return None
     
 class Node:
+    __slots__ = ['x', 'y', 'parent', 'cost', 'time', 'fuel']
     def __init__(self, x, y, parent=None, cost=0, time=0, fuel=0):
         self.x = x
         self.y = y
