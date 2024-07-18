@@ -9,8 +9,8 @@ Kha
 - [] Cài đặt BFS
 
 Phát
-- [] Cài đặt UCS
-- [] Cài đặt A*
+- [x] Cài đặt UCS
+- [x] Cài đặt A*
 
 Hoàng
 - [] Cài đặt level 2
