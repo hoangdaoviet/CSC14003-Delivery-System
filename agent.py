@@ -223,6 +223,11 @@ class PlayerLvl1:
             current_node = current_node.parent
         return result[::-1]
 
+"""
+if there is import error at this line (which means you don't have the library), 
+either install `heapdict` or just don't run at all
+"""
+from heapdict import heapdict as PQ
 class PlayerLvl2:
     def __init__(self, timeAllowed):
         self.timeAllowed = timeAllowed
@@ -232,8 +237,43 @@ class PlayerLvl2:
         input: list(list()), a 2D list representing the map
         output: list((x, y)), a list of strings representing the moves on the coordinate
         """
-        return []
+        x_movement = [-1, 1, 0, 0]
+        y_movement = [0, 0, -1, 1]
+        frontier = PQ() # (x, y): time
+        expanded = dict() # (x, y): 1
+        trace = dict() # (x, y): parent(x, y), cost
 
+        start = board.findStart()
+        end = board.findEnd()
+        frontier[start] = 0
+        trace[start] = (None, 0)
+
+        while len(frontier) != 0:
+            currentNode, currentTime = frontier.popitem()
+            currentCost = trace[currentNode][1]
+            expanded[currentNode] = 1
+
+            if currentNode == end:
+                break
+                
+            for i in range(4):
+                x, y = currentNode[0] + x_movement[i], currentNode[1] + y_movement[i]
+                if board.isValid(x, y) and (x, y) not in expanded:
+                    newTime = currentTime + 1 + (0 if board.board[x][y] == 'S' or board.board[x][y] == 'G' else int(board.board[x][y]))
+                    if newTime <= self.timeAllowed and ((x, y) not in frontier or newTime < frontier[(x, y)]):
+                        frontier[(x, y)] = newTime
+                        trace[(x, y)] = (currentNode, currentCost + 1)
+
+        result = []
+        currentNode = end
+        while currentNode is not None:
+            result.append(currentNode)
+            try:
+                currentNode = trace[currentNode][0]
+            except KeyError:
+                return 'No solution found.'
+        return result[::-1]
+    
 class PlayerLvl3:
     def __init__(self, timeAllowed, fuelCapacity):
         self.timeAllowed = timeAllowed
