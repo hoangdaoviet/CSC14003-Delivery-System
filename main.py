@@ -1,7 +1,7 @@
 from agent import *
 
-board = Board("input1_level1.txt")
+board = Board("input0_level2.txt")
 
-res = PlayerLvl1().DFS(board)
+res = PlayerLvl2(board.t).move(board)
 
 print(res)
