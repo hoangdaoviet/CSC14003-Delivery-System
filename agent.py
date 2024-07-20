@@ -1,6 +1,7 @@
 from board import *
 from queue import PriorityQueue, Queue
 from collections import deque
+import time
 
 class PlayerLvl1:
     def BFS(self, board: Board):
@@ -22,11 +23,17 @@ class PlayerLvl1:
         
         while frontier:
             current_node = frontier.popleft()
+            # sau khi đánh dấu node đã expanded thì tạm ngừng 1s để vẽ lên màn hình
+            board.coloredMap[current_node.x][current_node.y] = 'e' # e for expanded
+            time.sleep(1)
             check = False
             for i in range(4):
                 x = current_node.x + x_movement[i]
                 y = current_node.y + y_movement[i]
                 if board.isValid(x, y) and (x, y) not in reached:
+                    # sau khi đánh dấu node đã generated thì tạm ngừng 1s để vẽ lên màn hình
+                    board.coloredMap[x][y] = 'g' # g for generated
+                    time.sleep(1)
                     if x == goal[0] and y == goal[1]:
                         current_node = Node(x, y, current_node)
                         check = True
