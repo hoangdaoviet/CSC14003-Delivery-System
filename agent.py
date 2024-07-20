@@ -9,8 +9,8 @@ class PlayerLvl1:
         output: result: list((x, y)), a list of strings representing the moves on the coordinate
         delete pass statement before implementing
         """
-        goal = board.findEnd()
-        start = board.findStart()
+        goal = board.end
+        start = board.start
         x_movement = [1, -1, 0, 0]
         y_movement = [0, 0, -1, 1]
         reached = {start}
@@ -58,8 +58,8 @@ class PlayerLvl1:
         output: result: list((x, y)), a list of strings representing the moves on the coordinate
         delete pass statement before implementing
         """
-        goal = board.findEnd()
-        start = board.findStart()
+        goal = board.end
+        start = board.start
         current_node = Node(start[0], start[1], None, 0)
         stack = [current_node]
         reached = {start: current_node}
@@ -101,7 +101,7 @@ class PlayerLvl1:
         output: result: list((x, y)), a list of strings representing the moves on the coordinate
         delete pass statement before implementing
         """
-        start = board.findStart()
+        start = board.start
         current_node = Node(start[0], start[1], None, 0)
         frontier = PriorityQueue()
         frontier.put((current_node.cost, current_node))
@@ -142,8 +142,8 @@ class PlayerLvl1:
         def h(node):
             return abs(node.x - goal[0]) + abs(node.y - goal[1])
         
-        goal = board.findEnd()
-        start = board.findStart()
+        goal = board.end
+        start = board.start
         x_movement = [1, -1, 0, 0]
         y_movement = [0, 0, -1, 1]
         reached = {start}
@@ -180,12 +180,12 @@ class PlayerLvl1:
     
     @staticmethod
     def AStar(board: Board):
-        goal = board.findEnd()
+        goal = board.end
 
         def h(node):
             return abs(node.x - goal[0]) + abs(node.y - goal[1])
         
-        start = board.findStart()
+        start = board.start
         current_node = Node(start[0], start[1], None, 0)
         frontier = PriorityQueue()
         frontier.put((current_node.cost + h(current_node), current_node))
@@ -234,8 +234,8 @@ class PlayerLvl2:
         visited = list()
         parent = dict()
 
-        start = board.findStart()
-        end = board.findEnd()
+        start = board.start
+        end = board.end
         queue.put((start, 0))
         visited.append(start)
         parent[start] = None
@@ -267,7 +267,7 @@ class PlayerLvl2:
             try:
                 current = parent[current]
             except KeyError:
-                return 'No solution'
+                return -1
         return result[::-1]
                             
 class PlayerLvl3:

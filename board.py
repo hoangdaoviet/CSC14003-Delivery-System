@@ -16,19 +16,12 @@ class Board:
                 if self.board[i][j] == 'S':
                     self.start = (i, j)
 
-
     def extractInformation(self, filename):
         index_, buffer = filename.split('_')
         level_, _ = buffer.split('.')
         index = int(index_[5:])
         level = int(level_[5:])
         return index, level
-    
-    def findStart(self):
-        return self.start
-    
-    def findEnd(self):
-        return self.end
     
     def isValid(self, x, y):
         return 0 <= x < self.n and 0 <= y < self.m and self.board[x][y] != '-1'
