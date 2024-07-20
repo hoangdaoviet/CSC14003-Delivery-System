@@ -127,6 +127,9 @@ class PlayerLvl1:
                         reached[(x, y)] = new_node
                         frontier.put((new_node.cost, new_node))
 
+        if frontier.empty():
+            return -1
+
         result = []
         while current_node:
             result.append((current_node.x, current_node.y))
@@ -210,6 +213,9 @@ class PlayerLvl1:
                     if (x, y) not in reached or new_node.cost < reached[(x, y)].cost:
                         reached[(x, y)] = new_node
                         frontier.put((new_node.cost + h(new_node), new_node))
+
+        if frontier.empty():
+            return -1
 
         result = []
         while current_node:
