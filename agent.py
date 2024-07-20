@@ -1,10 +1,8 @@
 from board import *
-from queue import PriorityQueue
+from queue import PriorityQueue, Queue
 from collections import deque
-class PlayerLvl1:
-    def __init__(self):
-        pass
 
+class PlayerLvl1:
     def BFS(self, board: Board):
         """
         input: board: list(list()), a 2D list representing the map
@@ -45,18 +43,13 @@ class PlayerLvl1:
             current_node = current_node.parent
         return result[::-1]
 
-        
-
     def isCycle(self, node: Node):
-        
-            
         current = node.parent
         while current is not None:
             if current.x == node.x and current.y == node.y:
                 return True
             current = current.parent
         return False
-
 
     def DFS(self, board):
         """
@@ -99,7 +92,6 @@ class PlayerLvl1:
             current_node = current_node.parent
         return result[::-1]
             
-
     @staticmethod
     def UCS(board: Board):
         """
@@ -181,8 +173,6 @@ class PlayerLvl1:
             result.append((current_node.x, current_node.y))
             current_node = current_node.parent
         return result[::-1]
-
-        pass
     
     @staticmethod
     def AStar(board: Board):
@@ -232,8 +222,50 @@ class PlayerLvl2:
         input: list(list()), a 2D list representing the map
         output: list((x, y)), a list of strings representing the moves on the coordinate
         """
-        return []
+        """
+        idea: BFS with time limit; if the time is up, do not let it get into the queue
+        """
+        x_movement, y_movement = [1, -1, 0, 0], [0, 0, -1, 1]
+        queue = Queue()
+        visited = list()
+        parent = dict()
 
+        start = board.findStart()
+        end = board.findEnd()
+        queue.put((start, 0))
+        visited.append(start)
+        parent[start] = None
+        notFound = True
+
+        while queue.empty() == False and notFound:
+            current, time = queue.get()
+            for i in range(4):
+                x, y = current[0] + x_movement[i], current[1] + y_movement[i]
+                if board.isValid(x, y) == False:
+                    continue
+                toll = 0 if board.board[x][y] == 'G' or board.board[x][y] == 'S' else int(board.board[x][y])
+                newTime = time + 1 + toll
+                if newTime > self.timeAllowed:
+                    continue
+                if (x, y) == end:
+                    parent[(x, y)] = current
+                    notFound = False
+                    break
+                if (x, y) not in visited:
+                    queue.put(((x, y), newTime))
+                    visited.append((x, y))
+                    parent[(x, y)] = current
+        
+        result = []
+        current = end
+        while current is not None:
+            result.append(current)
+            try:
+                current = parent[current]
+            except KeyError:
+                return 'No solution'
+        return result[::-1]
+                            
 class PlayerLvl3:
     def __init__(self, timeAllowed, fuelCapacity):
         self.timeAllowed = timeAllowed

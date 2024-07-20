@@ -13,5 +13,5 @@ Phát
 - [x] Cài đặt A*
 
 Hoàng
-- [] Cài đặt level 2
+- [x] Cài đặt level 2
 - [] Cài đặt GUI

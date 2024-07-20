@@ -9,8 +9,13 @@ class Board:
             exit()
 
         self.index, self.level = self.extractInformation(filename)
-        self.start = self.findStart()
-        self.end = self.findEnd()
+        for i in range(self.n):
+            for j in range(self.m):
+                if self.board[i][j] == 'G':
+                    self.end = (i, j)
+                if self.board[i][j] == 'S':
+                    self.start = (i, j)
+
 
     def extractInformation(self, filename):
         index_, buffer = filename.split('_')
@@ -20,18 +25,10 @@ class Board:
         return index, level
     
     def findStart(self):
-        for i in range(self.n):
-            for j in range(self.m):
-                if self.board[i][j] == 'S':
-                    return (i, j)
-        return None
+        return self.start
     
     def findEnd(self):
-        for i in range(self.n):
-            for j in range(self.m):
-                if self.board[i][j] == 'G':
-                    return (i, j)
-        return None
+        return self.end
     
     def isValid(self, x, y):
         return 0 <= x < self.n and 0 <= y < self.m and self.board[x][y] != '-1'
