@@ -2,11 +2,11 @@
 
 ## Deadline: T6 19/6
 Trân
-- [] Cài đặt DFS
+- [x] Cài đặt DFS
 
 Kha
-- [] Cài đặt GBFS
-- [] Cài đặt BFS
+- [x] Cài đặt GBFS
+- [x] Cài đặt BFS
 
 Phát
 - [x] Cài đặt UCS
