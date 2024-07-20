@@ -36,7 +36,8 @@ class PlayerLvl1:
                     reached.add((x, y))
             if check:
                 break
-                    
+        if check == False:
+            return -1          
         result = []
         while current_node:
             result.append((current_node.x, current_node.y))
@@ -85,7 +86,8 @@ class PlayerLvl1:
                         reached[(x, y)] = new_node
             if check:
                 break
-        
+        if check == False:
+            return -1
         result = []
         while current_node:
             result.append((current_node.x, current_node.y))
@@ -168,6 +170,8 @@ class PlayerLvl1:
                     reached.add((x, y))
             if check:
                 break
+        if check == False:
+            return -1
         result = []
         while current_node:
             result.append((current_node.x, current_node.y))
