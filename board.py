@@ -8,9 +8,6 @@ class Board:
             print('File not found')
             exit()
 
-        # coloredMap chỉ dùng riêng cho việc vẽ bản đồ lên GUI
-        self.coloredMap = self.board.copy()
-
         self.index, self.level = self.extractInformation(filename)
         for i in range(self.n):
             for j in range(self.m):
