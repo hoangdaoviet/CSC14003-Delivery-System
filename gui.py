@@ -7,6 +7,9 @@ class App:
         self.root.geometry('450x450')
         self.root.title("Search project")
         self.filename = ''
+        self.steps = []
+        self.current_step = -1
+        self.previous_step = None
 
         # Define size of graph
         self.main_frame = tk.Frame(self.root)
@@ -51,7 +54,7 @@ class App:
         self.step = tk.Button(self.button_frame, text="Step by step", command=self.show_step_by_step, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
         self.step.pack(pady=(5, 5))
 
-        self.exit = tk.Button(self.button_frame, text="Exit", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
+        self.exit = tk.Button(self.button_frame, text="Exit", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=root.quit)
         self.exit.pack(pady=(5, 5))
 
     def create_grid(self, canvas, n, m, grid, cell_size=40):
@@ -116,37 +119,42 @@ class App:
         self.hidden_all_frame()
         self.clear_frame(self.step_by_step_frame)
         self.step_by_step_frame.pack(expand=True, anchor='center')
-        self.filename = self.entry.get()
-        self.default_text = self.filename
-       
-        
-        steps = read_output_file('outputGUI.txt')
-        n, m, grid = read_input_file(self.filename)
-        cell_size = 20
-        canvas = Canvas(self.step_by_step_frame, width=m * cell_size, height=n * cell_size)
-        canvas.pack()
 
-        self.create_grid(canvas, n, m, grid, cell_size)
-        self.show_steps(canvas, steps, cell_size)
+        self.steps = read_output_file('outputGUI.txt')
+        print(self.steps)
+        self.current_step = -1
+
+        n, m, self.grid = read_input_file(self.filename)
+        cell_size = 20
+        self.canvas = Canvas(self.step_by_step_frame, width=m * cell_size, height=n * cell_size)
+        self.canvas.pack()
+
+        self.create_grid(self.canvas, n, m, self.grid, cell_size)
 
         self.button_frame_step = tk.Frame(self.step_by_step_frame)
         self.button_frame_step.pack(pady=(40, 40))
+        self.next_step_button = tk.Button(self.button_frame_step, text="Next Step", command=self.next_step, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
+        self.next_step_button.pack(pady=(5, 5))
         self.back_step = tk.Button(self.button_frame_step, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         self.back_step.pack(pady=(5, 5))
 
-    def show_steps(self, canvas, steps, cell_size, delay=1):
-        for step in steps:
-            canvas.after(delay, lambda step=step: self.draw_step(canvas, step, cell_size))
-            delay += 1
+    def next_step(self):
+        if self.current_step < len(self.steps) - 1:
+            
+            self.current_step += 1
+            i, j = self.steps[self.current_step]
+            self.update_grid(i, j)
+            self.previous_step = (i, j)
 
-    def draw_step(self, canvas, step, cell_size):
-        i, j = step
+
+    def update_grid(self, i, j):
+        cell_size = 20
         x0 = j * cell_size
         y0 = i * cell_size
         x1 = x0 + cell_size
         y1 = y0 + cell_size
-        canvas.create_rectangle(x0, y0, x1, y1, fill='blue', outline='black')
-        canvas.create_text(x0 + cell_size / 2, y0 + cell_size / 2, text="S", font=("Helvetica", 12))
+        self.canvas.create_rectangle(x0, y0, x1, y1, fill='green', outline='black')
+        self.canvas.create_text(x0 + cell_size / 2, y0 + cell_size / 2, text="S", font=("Helvetica", 12))
 
 def read_input_file(filename):
     with open(filename, 'r') as f:
@@ -164,22 +172,17 @@ def read_input_file(filename):
     return n, m, grid
 
 def read_output_file(filename):
-    steps = []
     with open(filename, 'r') as f:
         lines = f.readlines()
 
-    if len(lines) > 1:
-        # Process the second line
-        for step in lines[1].strip().split():
-            step = step.strip('()')
-            if step:
-                parts = step.split(',')
-                if len(parts) == 2:
-                    try:
-                        steps.append((int(parts[0]), int(parts[1])))
-                    except ValueError:
-                        continue
-
+    steps = []
+    for line in lines:
+        parts = line.strip().split()
+        for part in parts:
+            if part.startswith('(') and part.endswith(')'):
+                i, j = map(int, part[1:-1].split(','))
+                print(i, j)
+                steps.append((i, j))
     return steps
 
 root = tk.Tk()
