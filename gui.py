@@ -7,9 +7,11 @@ import tkinter as tk
 
 class App:
     def __init__(self, root):
+        
         self.root = root
         self.root.geometry('450x450')
         self.root.title("Search project")
+        self.filename = ''
 
         #define size of graph
         self.main_frame = tk.Frame(self.root)
@@ -32,6 +34,7 @@ class App:
             self.entry.config(fg="gray")
 
     def show_main_frame(self):
+        self.hidden_all_frame()
         self.main_frame.pack(expand=True, anchor='center')
 
         self.entry = tk.Entry(self.main_frame, fg="gray", width=50, justify="center", bg="white", highlightbackground="#2F4F4F")
@@ -92,18 +95,28 @@ class App:
         self.step_by_step_frame.pack_forget()
         self.input_frame.pack_forget()
         self.path_frame.pack_forget()
-        
+    def clear_frame(self, frame):
+        for child in frame.winfo_children():
+            child.destroy()
+
     def show_input(self):
         self.hidden_all_frame()
+        self.clear_frame(self.input_frame)
         self.input_frame.pack(expand=True, anchor='center')
-        filename = self.entry.get()
+        self.filename = self.entry.get()
+        self.default_text = self.filename
         
-        n, m, grid = read_input_file(filename)
+        n, m, grid = read_input_file(self.filename)
         cell_size = 20
         canvas = Canvas(self.input_frame, width= m*cell_size, height=n*cell_size)
         canvas.pack()
     
         create_grid(canvas, n, m, grid, cell_size)
+
+        self.button_frame_2 = tk.Frame(self.input_frame)
+        self.button_frame_2.pack(pady=(40, 40))
+        self.back = tk.Button(self.button_frame_2, text="Back",command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
+        self.back.pack(pady=(5, 5))
         
 
 
