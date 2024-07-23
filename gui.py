@@ -192,13 +192,19 @@ def read_output_file(filename):
 
     steps = []
     for line in lines:
-        parts = line.strip().split()
+        parts = line.strip()
         print(parts)
-        for part in parts:
-            if part.startswith('(') and part.endswith(')'):
-                i, j = map(int, part[1:-1].split(','))
-                print(i, j)
-                steps.append((i, j))
+        length = len(parts)
+        for i in range(length):
+            for j in range(i + 1, length):
+                if parts[i] == '(' and parts[j] == ')':
+                    part = parts[i + 1: j]
+                    sp = part.find(',')
+                    x = int(part[:sp])
+                    y = int(part[sp + 1:])
+                    steps.append((x, y))
+                    break
+
     return steps
 
 root = tk.Tk()
