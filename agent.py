@@ -228,63 +228,135 @@ class PlayerLvl2:
     def __init__(self, timeAllowed):
         self.timeAllowed = timeAllowed
 
+    def __get_children(self, board, node):
+        x_movement, y_movement = [1, -1, 0, 0], [0, 0, -1, 1]
+        children = []
+
+        for i in range(4):
+            x = node.x + x_movement[i]
+            y = node.y + y_movement[i]
+
+            if board.isValid(x, y):
+                new_cost = node.cost + 1
+                new_time = node.time + (1 if board.board[x][y] in ['0', 'S', 'G'] else int(board.board[x][y]))
+
+                new_node = Node(x, y, node, cost=new_cost, time=new_time)
+                children.append(new_node)
+
+        return children
+
+    def __recursive_DLS(self, board, node, limit):
+        if board.board[node.x][node.y] == 'G':
+            return node
+        elif limit == 0:
+            return 0
+        else:
+            cutoff_occurred = False
+            for child in self.__get_children(board, node):
+                if child.time > self.timeAllowed or child.isCycle(node):
+                    continue
+                result = self.__recursive_DLS(board, child, limit - 1)
+                if result == 0:
+                    cutoff_occurred = True
+                elif result != -1:
+                    return result
+            if cutoff_occurred:
+                return 0
+            return -1
+
     def move(self, board):
         """
         input: list(list()), a 2D list representing the map
         output: list((x, y)), a list of strings representing the moves on the coordinate
         """
         """
-        idea: BFS with time limit; if the time is up, do not let it get into the queue
+        idea: IDS with time limit; if the time is up, do not let it get into the queue
         """
-        x_movement, y_movement = [1, -1, 0, 0], [0, 0, -1, 1]
-        queue = Queue()
-        visited = list()
-        parent = dict()
-
         start = board.start
-        end = board.end
-        queue.put((start, 0))
-        visited.append(start)
-        parent[start] = None
-        notFound = True
+        current_node = Node(start[0], start[1], None, 0, 0)
+        limit = 1
 
-        while queue.empty() == False and notFound:
-            current, time = queue.get()
-            for i in range(4):
-                x, y = current[0] + x_movement[i], current[1] + y_movement[i]
-                if board.isValid(x, y) == False:
-                    continue
-                toll = 0 if board.board[x][y] == 'G' or board.board[x][y] == 'S' else int(board.board[x][y])
-                newTime = time + 1 + toll
-                if newTime > self.timeAllowed:
-                    continue
-                if (x, y) == end:
-                    parent[(x, y)] = current
-                    notFound = False
-                    break
-                if (x, y) not in visited:
-                    queue.put(((x, y), newTime))
-                    visited.append((x, y))
-                    parent[(x, y)] = current
-        
-        result = []
-        current = end
-        while current is not None:
-            result.append(current)
-            try:
-                current = parent[current]
-            except KeyError:
+        while True:
+            res_node = self.__recursive_DLS(board, current_node, limit)
+            if res_node == -1:
                 return -1
+            if res_node == 0:
+                limit += 1
+            else:
+                break
+
+        result = []
+        while res_node:
+            result.append((res_node.x, res_node.y))
+            res_node = res_node.parent
         return result[::-1]
-                            
+
 class PlayerLvl3:
     def __init__(self, timeAllowed, fuelCapacity):
         self.timeAllowed = timeAllowed
         self.fuelCapacity = fuelCapacity
+
+    def __get_children(self, board, node):
+        x_movement, y_movement = [1, -1, 0, 0], [0, 0, -1, 1]
+        children = []
+
+        for i in range(4):
+            x = node.x + x_movement[i]
+            y = node.y + y_movement[i]
+
+            if board.isValid(x, y):
+                cell = board.board[x][y]
+                new_cost = node.cost + 1
+                new_time = node.time + (1 if cell in ['0', 'S', 'G'] else 2 if 'F' in cell else int(cell))
+                new_fuel = (node.fuel - 1) if 'F' not in cell else self.fuelCapacity
+
+                new_node = Node(x, y, node, cost=new_cost, time=new_time, fuel=new_fuel)
+                children.append(new_node)
+
+        return children
+
+    def __recursive_DLS(self, board, node, limit):
+        if board.board[node.x][node.y] == 'G':
+            return node
+        elif limit == 0:
+            return 0
+        else:
+            cutoff_occurred = False
+            for child in self.__get_children(board, node):
+                if child.time > self.timeAllowed or child.fuel < 0 or child.isCycle(node):
+                    continue
+                result = self.__recursive_DLS(board, child, limit - 1)
+                if result == 0:
+                    cutoff_occurred = True
+                elif result != -1:
+                    return result
+            if cutoff_occurred:
+                return 0
+            return -1
     
     def move(self, board):
         """
         input: list(list()), a 2D list representing the map
         output: list((x, y)), a list of strings representing the moves on the coordinate
         """
-        return []
+        """
+        idea: IDS with time limit; if the time is up, do not let it get into the queue
+        """
+        start = board.start
+        current_node = Node(start[0], start[1], None, 0, 0, self.fuelCapacity)
+        limit = 1
+
+        while True:
+            res_node = self.__recursive_DLS(board, current_node, limit)
+            if res_node == -1:
+                return -1
+            if res_node == 0:
+                limit += 1
+            else:
+                break
+
+        result = []
+        while res_node:
+            result.append((res_node.x, res_node.y))
+            res_node = res_node.parent
+        return result[::-1]

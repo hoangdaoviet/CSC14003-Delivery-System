@@ -77,10 +77,10 @@ class App:
         self.button_mainframe.pack(pady=(40, 40))
 
         # Create 4 buttons and add them to the frame
-        self.input_button = tk.Button(self.button_mainframe, text="show input", command=self.show_input, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
+        self.input_button = tk.Button(self.button_mainframe, text="Show input", command=self.show_input, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
         self.input_button.pack(pady=(5, 5))
 
-        self.result = tk.Button(self.button_mainframe, text="show path", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
+        self.result = tk.Button(self.button_mainframe, text="Show path", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
         self.result.pack(pady=(5, 5))
 
         self.step = tk.Button(self.button_mainframe, text="Step by step", command=self.show_step_by_step, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")

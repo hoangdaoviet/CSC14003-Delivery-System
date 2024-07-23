@@ -37,6 +37,8 @@ class Node:
         self.fuel = fuel
 
     def __eq__(self, other):
+        if not isinstance(other, Node):
+            return False
         return self.x == other.x and self.y == other.y
 
     def __lt__(self, other):
@@ -44,3 +46,10 @@ class Node:
 
     def __hash__(self):
         return hash((self.x, self.y))
+    
+    def isCycle(self, node):
+        while node is not None:
+            if node == self:
+                return True
+            node = node.parent
+        return False
