@@ -40,9 +40,7 @@ class App:
         self.entry.bind("<FocusIn>", self.on_entry_click)
         self.entry.bind("<FocusOut>", self.on_entry_focus_out)
         
-        self.filename = self.entry.get()
-        self.default_text = self.filename
-        print(self.filename)
+        
         # Create a frame to hold the buttons
         self.button_frame = tk.Frame(self.main_frame)
         self.button_frame.pack(pady=(40, 40))
@@ -103,7 +101,9 @@ class App:
         self.hidden_all_frame()
         self.clear_frame(self.input_frame)
         self.input_frame.pack(expand=True, anchor='center')
-
+        self.filename = self.entry.get()
+        self.default_text = self.filename
+        
         n, m, grid = read_input_file(self.filename)
         cell_size = 20
         canvas = Canvas(self.input_frame, width=m * cell_size, height=n * cell_size)
