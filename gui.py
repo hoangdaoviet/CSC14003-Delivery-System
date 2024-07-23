@@ -178,6 +178,7 @@ def read_output_file(filename):
     steps = []
     for line in lines:
         parts = line.strip().split()
+        print(parts)
         for part in parts:
             if part.startswith('(') and part.endswith(')'):
                 i, j = map(int, part[1:-1].split(','))
