@@ -123,7 +123,8 @@ class App:
 
         self.button_frame_step.pack(pady=(20, 20))
         self.back_step = tk.Button(self.button_frame_step, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=10, height=1, cursor="hand2")
-        self.back_step.pack(pady=(5, 5), side = tk.LEFT)
+        self.back_step.pack(side = tk.LEFT, padx = (0, 5))
+
         self.steps = read_output_file('outputGUI.txt')
         print(self.steps)
         self.current_step = -1
