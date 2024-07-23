@@ -39,7 +39,10 @@ class App:
 
         self.entry.bind("<FocusIn>", self.on_entry_click)
         self.entry.bind("<FocusOut>", self.on_entry_focus_out)
-
+        
+        self.filename = self.entry.get()
+        self.default_text = self.filename
+        print(self.filename)
         # Create a frame to hold the buttons
         self.button_frame = tk.Frame(self.main_frame)
         self.button_frame.pack(pady=(40, 40))
@@ -100,8 +103,6 @@ class App:
         self.hidden_all_frame()
         self.clear_frame(self.input_frame)
         self.input_frame.pack(expand=True, anchor='center')
-        self.filename = self.entry.get()
-        self.default_text = self.filename
 
         n, m, grid = read_input_file(self.filename)
         cell_size = 20
@@ -121,7 +122,7 @@ class App:
         self.step_by_step_frame.pack(expand=True, anchor='center')
         self.button_frame_step = tk.Frame(self.step_by_step_frame)
 
-        self.button_frame_step.pack(pady=(20, 20))
+        self.button_frame_step.pack(anchor="w",pady=(20, 20))
         self.back_step = tk.Button(self.button_frame_step, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=10, height=1, cursor="hand2")
         self.back_step.pack(side = tk.LEFT, padx = (0, 5))
 
@@ -139,9 +140,9 @@ class App:
         self.button_frame_step_2 = tk.Frame(self.step_by_step_frame)
         self.button_frame_step_2.pack(pady=(40, 40))
         self.next_step_button = tk.Button(self.button_frame_step_2, text="Next Step", command=self.next_step, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
-        self.next_step_button.pack(pady=(5, 5))
+        self.next_step_button.pack(side = tk.LEFT ,padx=(0, 3))
         self.auto_run_button = tk.Button(self.button_frame_step_2, text="Auto Run", command=self.auto_run, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
-        self.auto_run_button.pack(pady=(5, 5))
+        self.auto_run_button.pack(side = tk.RIGHT, padx=(8, 10))
         
 
     def next_step(self):
