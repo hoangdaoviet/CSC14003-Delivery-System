@@ -12,12 +12,13 @@ class App:
         self.previous_step = None
 
         # Define size of graph
+        self.welcome_frame = tk.Frame(self.root)
         self.main_frame = tk.Frame(self.root)
         self.input_frame = tk.Frame(self.root)
         self.path_frame = tk.Frame(self.root)
         self.step_by_step_frame = tk.Frame(self.root)
         self.default_text = "Enter relative path of file..."
-        self.show_main_frame()
+        self.show_welcome_frame()
 
     def on_entry_click(self, event):
         if self.entry.get() == self.default_text:
@@ -29,34 +30,55 @@ class App:
             self.entry.insert(0, self.default_text)
             self.entry.config(fg="gray")
 
-    def show_main_frame(self):
+    def show_welcome_frame(self):
         self.hidden_all_frame()
-        self.main_frame.pack(expand=True, anchor='center')
+        self.clear_frame(self.welcome_frame)
+        self.welcome_frame.pack(expand=True, anchor='center')
 
-        self.entry = tk.Entry(self.main_frame, fg="gray", width=50, justify="center", bg="white", highlightbackground="#2F4F4F")
+        self.label = tk.Label(self.welcome_frame, text="Welcome to the search project", font=("Helvetica", 16), fg="black")
+        self.label.pack(pady=(20, 20))
+
+        self.entry = tk.Entry(self.welcome_frame, fg="gray", width=50, justify="left", bg="white", highlightbackground="#2F4F4F")
         self.entry.insert(0, self.default_text)
-        self.entry.pack(pady=(50, 50))
+        self.entry.pack(side='left', pady=(5, 4), padx=(5, 5))
 
         self.entry.bind("<FocusIn>", self.on_entry_click)
         self.entry.bind("<FocusOut>", self.on_entry_focus_out)
-        
-        
-        # Create a frame to hold the buttons
-        self.button_frame = tk.Frame(self.main_frame)
+
+        self.button_frame = tk.Frame(self.welcome_frame)
         self.button_frame.pack(pady=(40, 40))
 
+        self.button_enter_input = tk.Button(self.button_frame, text="Enter", command=self.enter_input, bg="#323232", fg="#FAFAFA", width=40, height=1, cursor="hand2")
+        self.button_enter_input.pack(side='right', pady=(5, 5))
+
+        self.button_exit_frame = tk.Frame(self.welcome_frame)
+        self.button_exit_frame.pack(pady=(40, 40))
+
+        self.exit = tk.Button(self.button_exit_frame, text="Exit", bg="#323232", fg="#FAFAFA", width=40, height=1, cursor="hand2", command=root.quit)
+        self.exit.pack(pady=(5, 5))
+
+        
+
+    def show_main_frame(self):
+        self.hidden_all_frame()
+        self.clear_frame(self.main_frame)
+        self.main_frame.pack(expand=True, anchor='center')
+
+        self.button_mainframe = tk.Frame(self.main_frame)
+        self.button_mainframe.pack(pady=(40, 40))
+
         # Create 4 buttons and add them to the frame
-        self.input_button = tk.Button(self.button_frame, text="show input", command=self.show_input, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
+        self.input_button = tk.Button(self.button_mainframe, text="show input", command=self.show_input, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
         self.input_button.pack(pady=(5, 5))
 
-        self.result = tk.Button(self.button_frame, text="show path", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
+        self.result = tk.Button(self.button_mainframe, text="show path", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
         self.result.pack(pady=(5, 5))
 
-        self.step = tk.Button(self.button_frame, text="Step by step", command=self.show_step_by_step, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
+        self.step = tk.Button(self.button_mainframe, text="Step by step", command=self.show_step_by_step, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
         self.step.pack(pady=(5, 5))
 
-        self.exit = tk.Button(self.button_frame, text="Exit", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=root.quit)
-        self.exit.pack(pady=(5, 5))
+        self.exit_main = tk.Button(self.button_mainframe, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_welcome_frame)
+        self.exit_main.pack(pady=(5, 5))
 
     def create_grid(self, canvas, n, m, grid, cell_size=40):
         for i in range(n):
@@ -92,17 +114,21 @@ class App:
         self.step_by_step_frame.pack_forget()
         self.input_frame.pack_forget()
         self.path_frame.pack_forget()
+        self.welcome_frame.pack_forget()
 
     def clear_frame(self, frame):
         for child in frame.winfo_children():
             child.destroy()
 
+    def enter_input(self):
+        self.filename = self.entry.get()
+        self.default_text = self.filename
+        self.show_main_frame()
+
     def show_input(self):
         self.hidden_all_frame()
         self.clear_frame(self.input_frame)
         self.input_frame.pack(expand=True, anchor='center')
-        self.filename = self.entry.get()
-        self.default_text = self.filename
         
         n, m, grid = read_input_file(self.filename)
         cell_size = 20
