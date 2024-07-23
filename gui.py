@@ -119,7 +119,11 @@ class App:
         self.hidden_all_frame()
         self.clear_frame(self.step_by_step_frame)
         self.step_by_step_frame.pack(expand=True, anchor='center')
+        self.button_frame_step = tk.Frame(self.step_by_step_frame)
 
+        self.button_frame_step.pack(pady=(20, 20))
+        self.back_step = tk.Button(self.button_frame_step, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=10, height=1, cursor="hand2")
+        self.back_step.pack(pady=(5, 5), side = tk.LEFT)
         self.steps = read_output_file('outputGUI.txt')
         print(self.steps)
         self.current_step = -1
@@ -131,12 +135,13 @@ class App:
 
         self.create_grid(self.canvas, n, m, self.grid, cell_size)
 
-        self.button_frame_step = tk.Frame(self.step_by_step_frame)
-        self.button_frame_step.pack(pady=(40, 40))
-        self.next_step_button = tk.Button(self.button_frame_step, text="Next Step", command=self.next_step, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
+        self.button_frame_step_2 = tk.Frame(self.step_by_step_frame)
+        self.button_frame_step_2.pack(pady=(40, 40))
+        self.next_step_button = tk.Button(self.button_frame_step_2, text="Next Step", command=self.next_step, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         self.next_step_button.pack(pady=(5, 5))
-        self.back_step = tk.Button(self.button_frame_step, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
-        self.back_step.pack(pady=(5, 5))
+        self.auto_run_button = tk.Button(self.button_frame_step_2, text="Auto Run", command=self.auto_run, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
+        self.auto_run_button.pack(pady=(5, 5))
+        
 
     def next_step(self):
         if self.current_step < len(self.steps) - 1:
@@ -155,6 +160,15 @@ class App:
         y1 = y0 + cell_size
         self.canvas.create_rectangle(x0, y0, x1, y1, fill='green', outline='black')
         self.canvas.create_text(x0 + cell_size / 2, y0 + cell_size / 2, text="S", font=("Helvetica", 12))
+    
+    def auto_run(self):
+        self.running = True
+        self.auto_run_steps()
+
+    def auto_run_steps(self):
+        if self.running and self.current_step < len(self.steps) - 1:
+            self.next_step()
+            self.root.after(500, self.auto_run_steps)
 
 def read_input_file(filename):
     with open(filename, 'r') as f:
