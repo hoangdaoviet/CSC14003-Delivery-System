@@ -43,7 +43,7 @@ class PlayerLvl1:
         while current_node:
             result.append((current_node.x, current_node.y))
             current_node = current_node.parent
-        return result[::-1]
+        return {'S': result[::-1]}
 
     def isCycle(self, node: Node):
         current = node.parent
@@ -93,10 +93,9 @@ class PlayerLvl1:
         while current_node:
             result.append((current_node.x, current_node.y))
             current_node = current_node.parent
-        return result[::-1]
-            
-    @staticmethod
-    def UCS(board: Board):
+        return {'S': result[::-1]}
+    
+    def UCS(self, board: Board):
         """
         input: board: list(list()), a 2D list representing the map
         output: result: list((x, y)), a list of strings representing the moves on the coordinate
@@ -135,7 +134,7 @@ class PlayerLvl1:
         while current_node:
             result.append((current_node.x, current_node.y))
             current_node = current_node.parent
-        return result[::-1]
+        return {'S': result[::-1]}
 
     def GBFS(self, board):
         """
@@ -174,13 +173,15 @@ class PlayerLvl1:
                     reached.add((x, y))
             if check:
                 break
+
         if check == False:
             return -1
+        
         result = []
         while current_node:
             result.append((current_node.x, current_node.y))
             current_node = current_node.parent
-        return result[::-1]
+        return {'S': result[::-1]}
     
     @staticmethod
     def AStar(board: Board):
@@ -222,7 +223,7 @@ class PlayerLvl1:
         while current_node:
             result.append((current_node.x, current_node.y))
             current_node = current_node.parent
-        return result[::-1]
+        return {'S': result[::-1]}
 
 class PlayerLvl2:
     def __init__(self, timeAllowed):
