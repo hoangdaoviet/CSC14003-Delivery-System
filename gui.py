@@ -9,6 +9,7 @@ class App:
         self.root.geometry('600x600')
         self.root.title("Search project")
         self.filename = ''
+        self.algorithm_level1 = ''
         self.steps = {}
         self.current_step = {}
         self.entities = []
@@ -88,6 +89,27 @@ class App:
 
         self.exit_main = tk.Button(self.button_mainframe, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_welcome_frame)
         self.exit_main.pack(pady=(5, 5))
+    def show_choose_algorithm_frame(self):
+        self.hidden_all_frame()
+        self.clear_frame(self.choose_algorithm_frame)
+        self.choose_algorithm_frame.pack_forget()
+
+        self.button_choose = tk.Frame(self.choose_algorithm_frame)
+        self.button_choose.pack(pady = (40,40))
+
+        self.BFS_button = tk.Button(self.button_choose, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.set_algorithm_level1('BFS'))
+        self.BFS_button.pack(pady=(5, 5))
+        self.DFS_button = tk.Button(self.button_choose, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.set_algorithm_level1('DFS'))
+        self.DFS_button.pack(pady=(5, 5))
+        self.UCS_button = tk.Button(self.button_choose, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.set_algorithm_level1('UCS'))
+        self.UCS_button.pack(pady=(5, 5))
+        self.GBFS_button = tk.Button(self.button_choose, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.set_algorithm_level1('UCS'))
+        self.GBFS_button.pack(pady=(5, 5))
+        self.Astar_button = tk.Button(self.button_choose, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.set_algorithm_level1('Astar'))
+        self.Astar_button.pack(pady=(5, 5))
+
+    def set_algorithm_level1(self,str):
+        self.algorithm_level1 = str
 
     def create_grid(self, canvas, n, m, grid, cell_size=40):
         for i in range(n):
@@ -168,7 +190,7 @@ class App:
         self.back_step = tk.Button(self.button_frame_step, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=10, height=1, cursor="hand2")
         self.back_step.pack(side = tk.LEFT, padx = (0, 5))
 
-        self.steps = read_output_file('outputGUI1.txt')
+        self.steps = read_output_file('outputGUI.txt')
         print(self.steps)
         
         self.entities = list(self.steps.keys())
