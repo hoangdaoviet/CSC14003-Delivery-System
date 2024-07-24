@@ -23,6 +23,7 @@ class App:
         self.step_by_step_frame = tk.Frame(self.root)
         self.choose_algorithm_frame = tk.Frame(self.root)
         self.default_text = "Enter relative path of file..."
+        
         self.show_welcome_frame()
 
     def on_entry_click(self, event):
@@ -87,29 +88,44 @@ class App:
         self.step = tk.Button(self.button_mainframe, text="Step by step", command=self.show_step_by_step, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
         self.step.pack(pady=(5, 5))
 
-        self.exit_main = tk.Button(self.button_mainframe, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_welcome_frame)
-        self.exit_main.pack(pady=(5, 5))
+        if self.filename[12] == '1':
+            self.exit_main = tk.Button(self.button_mainframe, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_choose_algorithm_frame)
+            self.exit_main.pack(pady=(5, 5))
+        else:
+            self.exit_main = tk.Button(self.button_mainframe, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_welcome_frame)
+            self.exit_main.pack(pady=(5, 5))
+        
     def show_choose_algorithm_frame(self):
         self.hidden_all_frame()
         self.clear_frame(self.choose_algorithm_frame)
-        self.choose_algorithm_frame.pack_forget()
-
+        self.choose_algorithm_frame.pack(expand=True, anchor='center')
+        
+        print('show_choose_algorithm_frame')
         self.button_choose = tk.Frame(self.choose_algorithm_frame)
         self.button_choose.pack(pady = (40,40))
 
-        self.BFS_button = tk.Button(self.button_choose, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.set_algorithm_level1('BFS'))
+        self.BFS_button = tk.Button(self.button_choose, text="BFS", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=lambda:self.set_algorithm_level1('BFS'))
         self.BFS_button.pack(pady=(5, 5))
-        self.DFS_button = tk.Button(self.button_choose, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.set_algorithm_level1('DFS'))
+        self.DFS_button = tk.Button(self.button_choose, text="DFS", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=lambda:self.set_algorithm_level1('DFS'))
         self.DFS_button.pack(pady=(5, 5))
-        self.UCS_button = tk.Button(self.button_choose, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.set_algorithm_level1('UCS'))
+        self.UCS_button = tk.Button(self.button_choose, text="UCS", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=lambda:self.set_algorithm_level1('UCS'))
         self.UCS_button.pack(pady=(5, 5))
-        self.GBFS_button = tk.Button(self.button_choose, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.set_algorithm_level1('UCS'))
+        self.GBFS_button = tk.Button(self.button_choose, text="GBFS", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=lambda:self.set_algorithm_level1('GBFS'))
         self.GBFS_button.pack(pady=(5, 5))
-        self.Astar_button = tk.Button(self.button_choose, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.set_algorithm_level1('Astar'))
+        self.Astar_button = tk.Button(self.button_choose, text="A*", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=lambda:self.set_algorithm_level1('Astar'))
         self.Astar_button.pack(pady=(5, 5))
 
-    def set_algorithm_level1(self,str):
-        self.algorithm_level1 = str
+        self.back = tk.Button(self.button_choose, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_welcome_frame)
+        self.back.pack(pady=(5, 5))
+        
+
+    def set_algorithm_level1(self, algorithm):
+        self.algorithm_level1 = algorithm
+
+        self.show_main_frame()
+        
+        
+    
 
     def create_grid(self, canvas, n, m, grid, cell_size=40):
         for i in range(n):
@@ -138,6 +154,7 @@ class App:
                 canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline='black')
 
                 if value not in ['-1', '0']:
+                    pass
                     canvas.create_text(x0 + cell_size / 2, y0 + cell_size / 2, text=value, font=("Helvetica", 12))
 
     def hidden_all_frame(self):
@@ -146,6 +163,7 @@ class App:
         self.input_frame.pack_forget()
         self.path_frame.pack_forget()
         self.welcome_frame.pack_forget()
+        self.choose_algorithm_frame.pack_forget()
 
     def clear_frame(self, frame):
         for child in frame.winfo_children():
@@ -155,7 +173,12 @@ class App:
         self.filename = self.entry.get()
         if self.check_file_exists(self.filename):
             self.default_text = self.filename
-            self.show_main_frame()
+            print(self.filename[12])
+            if self.filename[12] == '1':
+                self.show_choose_algorithm_frame()
+            else:
+                self.show_main_frame()
+                
         #self.default_text = self.filename
         else:
             messagebox.showerror("Error", "File not found. Please enter a valid file path.")
@@ -169,7 +192,7 @@ class App:
         self.input_frame.pack(expand=True, anchor='center')
         
         n, m, grid = read_input_file(self.filename)
-        cell_size = 20
+        cell_size = 40
         canvas = Canvas(self.input_frame, width=m * cell_size, height=n * cell_size)
         canvas.pack()
 
@@ -190,7 +213,11 @@ class App:
         self.back_step = tk.Button(self.button_frame_step, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=10, height=1, cursor="hand2")
         self.back_step.pack(side = tk.LEFT, padx = (0, 5))
 
-        self.steps = read_output_file('outputGUI.txt')
+        outputFilename = 'output' + self.filename[5:]
+        if self.filename[12] == '1':
+            self.steps = read_output_file_level1(outputFilename, self.algorithm_level1)
+        else:
+            self.steps = read_output_file(outputFilename)
         print(self.steps)
         
         self.entities = list(self.steps.keys())
@@ -203,7 +230,7 @@ class App:
             self.label = tk.Label(self.step_by_step_frame, text="No solution", font=("Helvetica", 16), fg="black")
             self.label.pack(pady=(20, 20))
         else:
-            cell_size = 20
+            cell_size = 40
             self.canvas = Canvas(self.step_by_step_frame, width=m * cell_size, height=n * cell_size)
             self.canvas.pack()
 
@@ -230,7 +257,7 @@ class App:
         self.current_entity_index = (self.current_entity_index + 1) % len(self.entities)
 
     def update_grid(self, i, j, entity):
-        cell_size = 20
+        cell_size = 40
         x0 = j * cell_size
         y0 = i * cell_size
         x1 = x0 + cell_size
@@ -293,6 +320,41 @@ def read_output_file(filename):
 
     return steps
 
+def read_output_file_level1(filename, algorithm):
+    steps = {}
+    current_key = None
+
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+
+    for i in range(len(lines)):
+        if lines[i].startswith(algorithm):
+            for j in range(i + 1, i + 3):
+                parts = lines[j].strip()
+                if parts == '-1':
+                    break
+        # Check if this line is an entity identifier like "S", "S1", etc.
+                if re.match(r'^\w+$', parts):
+                    current_key = parts
+                    steps[current_key] = []
+                else:
+                    # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
+                    matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
+                    if matches and current_key:
+                        for match in matches:
+                            i, j = int(match[0]), int(match[1])
+                            steps[current_key].append((i, j))
+                    else:
+                        print(f"No matches found in line: {lines[j]}")
+
+    if not steps:
+        print("No steps parsed from the output file.")
+    else:
+        print(f"Parsed steps: {steps}")
+
+    return steps
+#steps = read_output_file_level1('outputGUI1.txt', 'DFS')
+#print(steps)
 root = tk.Tk()
 app = App(root)
 root.mainloop()
