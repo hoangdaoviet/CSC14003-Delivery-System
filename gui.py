@@ -1,8 +1,10 @@
 import tkinter as tk
-from tkinter import Canvas, messagebox
+from tkinter import Canvas, messagebox, StringVar
 import re
 import os
 import random
+from board import Board 
+from agent import *
 
 class App:
     def __init__(self, root):
@@ -126,18 +128,20 @@ class App:
         self.clear_frame(self.path_frame)
         self.path_frame.pack(expand=True, anchor='center')
 
-        n, m, grid = read_input_file(self.filename)
+        n, m, grid ,t,f= read_input_file(self.filename)
 
         canvas = Canvas(self.path_frame, width=m * 40, height=n * 40)
         canvas.pack()
 
         self.create_grid(canvas, n, m, grid)
 
-        outputFilename = 'output' + self.filename[5:]
-        if self.filename[12] == '1':
-            paths = read_output_file_level1(outputFilename, self.algorithm_level1)
-        else:
-            paths = read_output_file(outputFilename)
+        paths = self.get_path()
+        
+        # outputFilename = 'output' + self.filename[5:]
+        # if self.filename[12] == '1':
+        #     paths = read_output_file_level1(outputFilename, self.algorithm_level1)
+        # else:
+        #     paths = read_output_file(outputFilename)
 
         if paths:
             for entity, path in paths.items():
@@ -229,15 +233,32 @@ class App:
         self.clear_frame(self.input_frame)
         self.input_frame.pack(expand=True, anchor='center')
         
-        n, m, grid = read_input_file(self.filename)
+        
+
+        n, m, grid, t, f = read_input_file(self.filename)
+
+        if self.filename[12] != '1':
+            time_var = StringVar()
+            time_var.set(f"Time limit: {t}")
+
+            self.label = tk.Label(self.input_frame, textvariable= time_var, font=("Helvetica", 14), fg="black")
+            self.label.pack(pady=(10, 10))
+            
+            if self.filename[12] != '2':
+                fuel_var = StringVar()
+                fuel_var.set(f"Fuel limit: {f}")
+
+                self.label = tk.Label(self.input_frame, textvariable= fuel_var, font=("Helvetica", 14), fg="black")
+                self.label.pack(pady=(5, 5))
         cell_size = 40
         canvas = Canvas(self.input_frame, width=m * cell_size, height=n * cell_size)
         canvas.pack()
+        
 
         self.create_grid(canvas, n, m, grid, cell_size)
 
         self.button_frame_input = tk.Frame(self.input_frame)
-        self.button_frame_input.pack(pady=(40, 40))
+        self.button_frame_input.pack(pady=(30, 30))
         self.back = tk.Button(self.button_frame_input, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         self.back.pack(pady=(5, 5))
 
@@ -251,19 +272,22 @@ class App:
         self.back_step = tk.Button(self.button_frame_step, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=10, height=1, cursor="hand2")
         self.back_step.pack(side = tk.LEFT, padx = (0, 5))
 
-        outputFilename = 'output' + self.filename[5:]
-        if self.filename[12] == '1':
-            self.steps = read_output_file_level1(outputFilename, self.algorithm_level1)
-        else:
-            self.steps = read_output_file(outputFilename)
-        print(self.steps)
+        
+
+        self.steps = self.get_path()
+        # outputFilename = 'output' + self.filename[5:]
+        # if self.filename[12] == '1':
+        #     self.steps = read_output_file_level1(outputFilename, self.algorithm_level1)
+        # else:
+        #     self.steps = read_output_file(outputFilename)
+        # print(self.steps)
         
         self.entities = list(self.steps.keys())
         self.current_step = {entity: -1 for entity in self.entities}
 
         print(f"Entities: {self.entities}")
         
-        n, m, self.grid = read_input_file(self.filename)
+        n, m, self.grid,t,f= read_input_file(self.filename)
         if not self.entities:
             self.label = tk.Label(self.step_by_step_frame, text="No solution", font=("Helvetica", 16), fg="black")
             self.label.pack(pady=(20, 20))
@@ -327,6 +351,33 @@ class App:
             self.root.update()
             self.root.after(500) # 500 milliseconds delay between steps
 
+    def get_path(self):
+        board = Board(self.filename)
+        if self.filename[12] == '1':
+            agent = PlayerLvl1()
+            if self.algorithm_level1 == 'BFS':
+                path = agent.BFS(board)
+            elif self.algorithm_level1 == 'DFS':
+                path = agent.DFS(board)
+            elif self.algorithm_level1 == 'UCS':
+                path = agent.UCS(board)
+            elif self.algorithm_level1 == 'GBFS':
+                path = agent.GBFS(board)
+            elif self.algorithm_level1 == 'Astar':
+                path = agent.AStar(board)
+        
+        
+        elif self.filename[12] == '2':
+            agent = PlayerLvl2(board.t)
+            path = agent.move(board)
+        elif self.filename[12] == '3':
+            agent = PlayerLvl3(board.t, board.f)
+            path = agent.move(board)
+        #else:
+        #    agent = PlayerLvl4(board)
+        #    path = agent.move(board)
+        return path
+
 def blend_colors(color1, color2):
     # Convert colors to RGB
     r1, g1, b1 = int(color1[1:3], 16), int(color1[3:5], 16), int(color1[5:], 16)
@@ -339,6 +390,11 @@ def blend_colors(color1, color2):
 
         # Return the blended color as a hex string
     return f'#{r:02x}{g:02x}{b:02x}'
+
+
+        
+
+
 
 def read_input_file(filename):
     with open(filename, 'r') as f:
@@ -353,7 +409,7 @@ def read_input_file(filename):
         row = line.split()
         grid.append(row)
 
-    return n, m, grid
+    return n, m, grid, t, f
 
 def read_output_file(filename):
     steps = {}
