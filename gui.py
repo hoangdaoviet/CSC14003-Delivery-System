@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import Canvas, messagebox
 import re
 import os
+import random
 
 class App:
     def __init__(self, root):
@@ -22,6 +23,7 @@ class App:
         self.path_frame = tk.Frame(self.root)
         self.step_by_step_frame = tk.Frame(self.root)
         self.choose_algorithm_frame = tk.Frame(self.root)
+        
         self.default_text = "Enter relative path of file..."
         
         self.show_welcome_frame()
@@ -82,7 +84,7 @@ class App:
         self.input_button = tk.Button(self.button_mainframe, text="Show input", command=self.show_input, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
         self.input_button.pack(pady=(5, 5))
 
-        self.result = tk.Button(self.button_mainframe, text="Show path", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
+        self.result = tk.Button(self.button_mainframe, text="Show path",command= self.show_path_frame, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
         self.result.pack(pady=(5, 5))
 
         self.step = tk.Button(self.button_mainframe, text="Step by step", command=self.show_step_by_step, bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2")
@@ -118,6 +120,42 @@ class App:
         self.back = tk.Button(self.button_choose, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_welcome_frame)
         self.back.pack(pady=(5, 5))
         
+
+    def show_path_frame(self):
+        self.hidden_all_frame()
+        self.clear_frame(self.path_frame)
+        self.path_frame.pack(expand=True, anchor='center')
+
+        n, m, grid = read_input_file(self.filename)
+
+        canvas = Canvas(self.path_frame, width=m * 40, height=n * 40)
+        canvas.pack()
+
+        self.create_grid(canvas, n, m, grid)
+
+        outputFilename = 'output' + self.filename[5:]
+        if self.filename[12] == '1':
+            paths = read_output_file_level1(outputFilename, self.algorithm_level1)
+        else:
+            paths = read_output_file(outputFilename)
+
+        if paths:
+            for entity, path in paths.items():
+                if entity == 'S':
+                    color = '#00FF00'
+                else:
+                    color = f'#{random.randint(0, 0xFFFFFF):06x}'
+                for i in range(1, len(path)):
+                    x0 = path[i-1][1] * 40 + 20
+                    y0 = path[i-1][0] * 40 + 20
+                    x1 = path[i][1] * 40 + 20
+                    y1 = path[i][0] * 40 + 20
+                    canvas.create_line(x0, y0, x1, y1, fill=color, width=2)
+
+                
+
+        button_back = tk.Button(self.path_frame, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
+        button_back.pack(pady=10)
 
     def set_algorithm_level1(self, algorithm):
         self.algorithm_level1 = algorithm
@@ -256,13 +294,28 @@ class App:
         
         self.current_entity_index = (self.current_entity_index + 1) % len(self.entities)
 
+    def check_override(self, i, j, entity):
+        for index in range(self.current_step[entity]):
+            if i == self.steps[entity][index][0] and j == self.steps[entity][index][1]:
+                return True
+        return False
+
     def update_grid(self, i, j, entity):
         cell_size = 40
         x0 = j * cell_size
         y0 = i * cell_size
         x1 = x0 + cell_size
         y1 = y0 + cell_size
-        self.canvas.create_rectangle(x0, y0, x1, y1, fill='green', outline='black')
+        if len(entity) > 1:
+            if self.check_override(i,j,entity):
+                self.canvas.create_rectangle(x0, y0, x1, y1, fill='#F89F5E', outline='black')
+            else:
+                self.canvas.create_rectangle(x0, y0, x1, y1, fill='#FFD1B0', outline='black')
+        else:
+            if self.check_override(i,j,entity):
+                self.canvas.create_rectangle(x0, y0, x1, y1, fill='#00AA00', outline='black')
+            else:
+                self.canvas.create_rectangle(x0, y0, x1, y1, fill='#00FF00', outline='black')
         self.canvas.create_text(x0 + cell_size / 2, y0 + cell_size / 2, text=entity, font=("Helvetica", 12))
 
     def auto_run(self):
@@ -273,6 +326,19 @@ class App:
             self.next_step()
             self.root.update()
             self.root.after(500) # 500 milliseconds delay between steps
+
+def blend_colors(color1, color2):
+    # Convert colors to RGB
+    r1, g1, b1 = int(color1[1:3], 16), int(color1[3:5], 16), int(color1[5:], 16)
+    r2, g2, b2 = int(color2[1:3], 16), int(color2[3:5], 16), int(color2[5:], 16)
+
+        # Blend the colors
+    r = (r1 + r2) // 2
+    g = (g1 + g2) // 2
+    b = (b1 + b2) // 2
+
+        # Return the blended color as a hex string
+    return f'#{r:02x}{g:02x}{b:02x}'
 
 def read_input_file(filename):
     with open(filename, 'r') as f:
