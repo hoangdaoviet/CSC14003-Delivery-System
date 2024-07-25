@@ -1,6 +1,7 @@
 from board import *
 from queue import PriorityQueue, Queue
 from collections import deque
+from copy import deepcopy
 import time
 
 class PlayerLvl1:
@@ -183,8 +184,7 @@ class PlayerLvl1:
             current_node = current_node.parent
         return {'S': result[::-1]}
     
-    @staticmethod
-    def AStar(board: Board):
+    def AStar(self, board: Board):
         goal = board.end
 
         def h(node):
@@ -289,6 +289,13 @@ class PlayerLvl2:
         result = []
         while res_node:
             result.append((res_node.x, res_node.y))
+
+            for _ in range(int(board.board[res_node.x][res_node.y][1:]) if board.board[res_node.x][res_node.y][0] == 'F'
+                                                                        else int(board.board[res_node.x][res_node.y])
+                                                                        if board.board[res_node.x][res_node.y] not in ['S', 'G']
+                                                                        else 0):
+                result.append((res_node.x, res_node.y))
+
             res_node = res_node.parent
         return {'S': result[::-1]}
 
@@ -298,7 +305,10 @@ class PlayerLvl3:
         self.fuelCapacity = fuelCapacity
 
     def __get_children(self, board, node):
-        x_movement, y_movement = [1, -1, 0, 0], [0, 0, -1, 1]
+        if node.fuel == 0:
+            return []
+
+        x_movement, y_movement = [0, 1, 0, -1], [1, 0, -1, 0]
         children = []
 
         for i in range(4):
@@ -308,56 +318,77 @@ class PlayerLvl3:
             if board.isValid(x, y):
                 cell = board.board[x][y]
                 new_cost = node.cost + 1
-                new_time = node.time + (1 if cell in ['0', 'S', 'G'] else int(cell[1:]) if cell[0] == 'F' else int(cell))
-                new_fuel = (node.fuel - 1) if cell[0] == 'F' else self.fuelCapacity
+                new_time = node.time + (1 if cell in ['0', 'S', 'G'] else (int(cell[1:]) + 1) if cell[0] == 'F' else int(cell))
+                new_fuel = (node.fuel - 1) if cell[0] != 'F' else self.fuelCapacity
 
                 new_node = Node(x, y, node, cost=new_cost, time=new_time, fuel=new_fuel)
                 children.append(new_node)
 
         return children
 
-    def __recursive_DLS(self, board, node, limit):
-        if board.board[node.x][node.y] == 'G':
+    def __recursive_DLS(self, board, node, limit, goal):
+        if (node.x, node.y) == (goal[0], goal[1]):
             return node
         elif limit == 0:
             return 0
         else:
             cutoff_occurred = False
+
             for child in self.__get_children(board, node):
-                if child.time > self.timeAllowed or child.fuel < 0 or child.isCycle(node):
+                if child.time > self.timeAllowed:
                     continue
-                result = self.__recursive_DLS(board, child, limit - 1)
+                result = self.__recursive_DLS(board, child, limit - 1, goal)
+
                 if result == 0:
                     cutoff_occurred = True
                 elif result != -1:
                     return result
+                
             if cutoff_occurred:
                 return 0
             return -1
     
+    def IDS(self, board, start, goal):
+        current_node = Node(start[0], start[1], None, 0, 0, self.fuelCapacity)
+        limit = 1
+
+        while True:
+            res_node = self.__recursive_DLS(board, current_node, limit, goal)
+            if res_node == -1:
+                return -1
+            if res_node == 0:
+                limit += 1
+            else:
+                return res_node
+
     def move(self, board):
         """
         input: list(list()), a 2D list representing the map
         output: list((x, y)), a list of strings representing the moves on the coordinate
         """
         """
-        idea: IDS with time limit; if the time is up, do not let it get into the queue
+        idea:
+            - IDS with time limit; if the time is up, do not let it get into the queue
+            - Allow cycles in the path since we can limit the loop by the fuel capacity and the time limit
+            - Even if the fuel can be refilled infinitely, the time limit is always finite so the loop will eventually stop
         """
-        start = board.start
-        current_node = Node(start[0], start[1], None, 0, 0, self.fuelCapacity)
-        limit = 1
 
-        while True:
-            res_node = self.__recursive_DLS(board, current_node, limit)
-            if res_node == -1:
-                return -1
-            if res_node == 0:
-                limit += 1
-            else:
-                break
+        start = board.start
+        goal = board.end
+        res_node = self.IDS(board, start, goal)
+        if res_node == -1:
+            return -1
 
         result = []
         while res_node:
             result.append((res_node.x, res_node.y))
+            
+            for _ in range(int(board.board[res_node.x][res_node.y][1:]) if board.board[res_node.x][res_node.y][0] == 'F'
+                                                                        else int(board.board[res_node.x][res_node.y])
+                                                                        if board.board[res_node.x][res_node.y] not in ['S', 'G']
+                                                                        else 0):
+                result.append((res_node.x, res_node.y))
+
             res_node = res_node.parent
+        
         return {'S': result[::-1]}

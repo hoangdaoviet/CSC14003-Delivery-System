@@ -26,15 +26,31 @@ class Board:
     def isValid(self, x, y):
         return 0 <= x < self.n and 0 <= y < self.m and self.board[x][y] != '-1'
     
+    def get_all_fuel(self):
+        fuel = []
+        for i in range(self.n):
+            for j in range(self.m):
+                if self.board[i][j][0] == 'F':
+                    fuel.append((i, j))
+        return fuel
+    
 class Node:
-    __slots__ = ['x', 'y', 'parent', 'cost', 'time', 'fuel']
-    def __init__(self, x, y, parent=None, cost=0, time=0, fuel=0):
-        self.x = x
-        self.y = y
-        self.parent = parent
-        self.cost = cost
-        self.time = time
-        self.fuel = fuel
+    __slots__ = ['x', 'y', 'parent', 'cost', 'time', 'fuel', 'node']
+    def __init__(self, x=None, y=None, parent=None, cost=0, time=0, fuel=0, node=None):
+        if node is None:
+            self.x = x
+            self.y = y
+            self.parent = parent
+            self.cost = cost
+            self.time = time
+            self.fuel = fuel
+        else:
+            self.x = node.x
+            self.y = node.y
+            self.parent = None
+            self.cost = node.cost
+            self.time = node.time
+            self.fuel = node.fuel
 
     def __eq__(self, other):
         if not isinstance(other, Node):
