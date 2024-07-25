@@ -290,7 +290,7 @@ class PlayerLvl2:
         while res_node:
             result.append((res_node.x, res_node.y))
             res_node = res_node.parent
-        return result[::-1]
+        return {'S': result[::-1]}
 
 class PlayerLvl3:
     def __init__(self, timeAllowed, fuelCapacity):
@@ -308,8 +308,8 @@ class PlayerLvl3:
             if board.isValid(x, y):
                 cell = board.board[x][y]
                 new_cost = node.cost + 1
-                new_time = node.time + (1 if cell in ['0', 'S', 'G'] else 2 if 'F' in cell else int(cell))
-                new_fuel = (node.fuel - 1) if 'F' not in cell else self.fuelCapacity
+                new_time = node.time + (1 if cell in ['0', 'S', 'G'] else int(cell[1:]) if cell[0] == 'F' else int(cell))
+                new_fuel = (node.fuel - 1) if cell[0] == 'F' else self.fuelCapacity
 
                 new_node = Node(x, y, node, cost=new_cost, time=new_time, fuel=new_fuel)
                 children.append(new_node)
@@ -360,4 +360,4 @@ class PlayerLvl3:
         while res_node:
             result.append((res_node.x, res_node.y))
             res_node = res_node.parent
-        return result[::-1]
+        return {'S': result[::-1]}
