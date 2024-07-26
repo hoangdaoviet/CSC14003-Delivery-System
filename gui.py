@@ -396,9 +396,9 @@ class App:
             agent = PlayerLvl3(board.t, board.f)
             path = agent.move(board)
         else:
-        #    agent = PlayerLvl4(board)
-        #    path = agent.move(board)
-            path = read_output_file('output' + self.filename[5:])
+           agent = PlayerLvl4(board)
+           path = agent.move(board)
+            # path = read_output_file('output' + self.filename[5:])
         return path
     
     def darken_color(self, color, factor=0.7):
