@@ -1,7 +1,8 @@
 from board import *
-from queue import PriorityQueue, Queue
+from queue import PriorityQueue
 from collections import deque
-from copy import deepcopy
+from copy import deepcopy as dcopy
+import numpy as np
 import time
 
 class PlayerLvl1:
@@ -184,7 +185,8 @@ class PlayerLvl1:
             current_node = current_node.parent
         return {'S': result[::-1]}
     
-    def AStar(self, board: Board):
+    @staticmethod
+    def AStar(board: Board):
         goal = board.end
 
         def h(node):
@@ -392,3 +394,131 @@ class PlayerLvl3:
             res_node = res_node.parent
         
         return {'S': result[::-1]}
+
+class PlayerLvl4:
+    def __init__(self, timeAllowed, fuelCapacity):
+        self.timeAllowed = timeAllowed
+        self.fuelCapacity = fuelCapacity
+        self.agents = []
+        self.goals = []
+        np.random.seed()
+
+    def __get_children(self, board, node):
+        if node.fuel == 0:
+            return []
+
+        x_movement, y_movement = [0, 1, 0, -1], [1, 0, -1, 0]
+        children = []
+
+        for i in range(4):
+            x = node.x + x_movement[i]
+            y = node.y + y_movement[i]
+
+            if board.isValid(x, y):
+                cell = board.board[x][y]
+                new_cost = node.cost + 1
+                new_time = node.time + (1 if cell in ['0', 'S', 'G'] else (int(cell[1:]) + 1) if cell[0] == 'F'
+                                                                     else int(cell) if 'G' not in cell
+                                                                     else int(cell[1:]))
+                new_fuel = (node.fuel - 1) if cell[0] != 'F' else self.fuelCapacity
+
+                new_node = Node(x, y, node, cost=new_cost, time=new_time, fuel=new_fuel)
+                children.append(new_node)
+
+        return children
+    
+    def __get_next_location_hill_climbing(self, board, node, goal):
+        def h(node):
+            return abs(node.x - goal[0]) + abs(node.y - goal[1])
+        
+        children = sorted(self.__get_children(board, node), key=lambda x: h(x))
+
+        num_children = len(children)
+        ratio = [0.8] + [0.2 / (num_children - 1) for _ in range(num_children - 1)]
+
+        return np.random.choice(children, p=ratio) if num_children > 1 else children[0] if num_children != 0 else node
+
+    def move(self, board: Board):
+        """
+        input: list(list()), a 2D list representing the map
+        output: list((x, y)), a list of strings representing the moves on the coordinate
+        """
+        start = board.start
+        end = board.end
+        main_agent = Node(start[0], start[1], None, 0, 0, self.fuelCapacity)
+
+        for agent, location in board.get_all_agents():
+            self.agents.append((agent, Node(location[0], location[1], None, 0, 0, self.fuelCapacity)))
+
+        for goal, location in board.get_all_goals():
+            self.goals.append((goal, location))
+
+        search_board = dcopy(board)
+
+        cell_values = ['0' for _ in range(10)]
+
+        # check_list = []
+
+        # count = 0
+
+        while True:
+            # count += 1
+            # print_list = [(main_agent.x, main_agent.y)]
+            # for i in range(len(self.agents)):
+            #     print_list.append((self.agents[i][1].x, self.agents[i][1].y))
+            # check_list.append(print_list)
+            # if count == 1000:
+            #     with open('output.txt', 'w') as f:
+            #         for row in check_list:
+            #             f.write(str(row) + '\n')
+            #     return -1
+
+            tmp_next_location = self.__get_next_location_hill_climbing(search_board, main_agent, end)
+            if tmp_next_location.time > self.timeAllowed:
+                break
+            if search_board.board[tmp_next_location.x][tmp_next_location.y] == 'G':
+                break
+
+            search_board.board[main_agent.x][main_agent.y] = cell_values[0]
+            cell_values[0] = search_board.board[tmp_next_location.x][tmp_next_location.y]
+            search_board.board[tmp_next_location.x][tmp_next_location.y] = 'S'
+
+            main_agent = tmp_next_location
+
+            for i in range(len(self.agents)):
+                current_agent = self.agents[i][1]
+                current_goal = self.goals[i][1]
+                tmp_next_location = self.__get_next_location_hill_climbing(search_board, current_agent, current_goal)
+                if tmp_next_location.time > self.timeAllowed:
+                    break
+                if search_board.board[tmp_next_location.x][tmp_next_location.y] == 'G' + str(i):
+                    search_board.board[current_agent.x][current_agent.y] = 0
+                    
+                    new_row = np.random.randint(0, search_board.n - 1)
+                    new_col = np.random.randint(0, search_board.m - 1)
+
+                    while search_board.board[new_row][new_col] in ['S', 'G', '-1'] or 'G' in search_board.board[new_row][new_col]:
+                        new_row = np.random.randint(0, search_board.n - 1)
+                        new_col = np.random.randint(0, search_board.m - 1)
+
+                    search_board.board[new_row][new_col] = 'G' + str(i)
+
+                search_board.board[current_agent.x][current_agent.y] = cell_values[i + 1]
+                cell_values[i + 1] = search_board.board[tmp_next_location.x][tmp_next_location.y]
+                search_board.board[tmp_next_location.x][tmp_next_location.y] = 'S' + str(i)
+
+                self.agents[i] = (i, tmp_next_location)
+
+        result = [[]]
+        while main_agent:
+            result[0].append((main_agent.x, main_agent.y))
+            main_agent = main_agent.parent
+
+        for i in range(len(self.agents)):
+            current_agent = self.agents[i][1]
+            result.append([])
+            while current_agent:
+                result[i + 1].append((current_agent.x, current_agent.y))
+                current_agent = current_agent.parent
+
+        return [{'S': result[0][::-1]}] + [{'S' + str(i): result[i + 1][::-1]} for i in range(len(self.agents))]

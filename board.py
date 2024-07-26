@@ -24,15 +24,23 @@ class Board:
         return index, level
     
     def isValid(self, x, y):
-        return 0 <= x < self.n and 0 <= y < self.m and self.board[x][y] != '-1'
+        return 0 <= x < self.n and 0 <= y < self.m and self.board[x][y] != '-1' and 'S' not in self.board[x][y]
     
-    def get_all_fuel(self):
-        fuel = []
+    def get_all_agents(self):
+        res = {}
         for i in range(self.n):
             for j in range(self.m):
-                if self.board[i][j][0] == 'F':
-                    fuel.append((i, j))
-        return fuel
+                if 'S' in self.board[i][j] and len(self.board[i][j]) > 1:
+                    res[int(self.board[i][j][1:])] = (i, j)
+        return sorted(res.items())
+    
+    def get_all_goals(self):
+        res = {}
+        for i in range(self.n):
+            for j in range(self.m):
+                if 'G' in self.board[i][j] and len(self.board[i][j]) > 1:
+                    res[int(self.board[i][j][1:])] = (i, j)
+        return sorted(res.items())
     
 class Node:
     __slots__ = ['x', 'y', 'parent', 'cost', 'time', 'fuel', 'node']

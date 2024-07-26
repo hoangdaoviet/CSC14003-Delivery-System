@@ -1,6 +1,6 @@
 from agent import *
 
-board = Board('input0_level3.txt')
-agent = PlayerLvl3(board.t, board.f)
+board = Board('input1_level4.txt')
+agent = PlayerLvl4(board.t, board.f)
 path = agent.move(board)
 print(path)
