@@ -17,7 +17,7 @@ class App:
         self.current_step = {}
         self.entities = []
         self.current_entity_index = 0
-
+        self.array_color = {}
         # Define size of graph
         self.welcome_frame = tk.Frame(self.root)
         self.main_frame = tk.Frame(self.root)
@@ -25,7 +25,6 @@ class App:
         self.path_frame = tk.Frame(self.root)
         self.step_by_step_frame = tk.Frame(self.root)
         self.choose_algorithm_frame = tk.Frame(self.root)
-        
         self.default_text = "Enter relative path of file..."
         
         self.show_welcome_frame()
@@ -144,6 +143,7 @@ class App:
         #     paths = read_output_file(outputFilename)
 
         if paths:
+            
             for entity, path in paths.items():
                 if entity == 'S':
                     color = '#00FF00'
@@ -281,6 +281,15 @@ class App:
         # else:
         #     self.steps = read_output_file(outputFilename)
         # print(self.steps)
+
+        for entity in self.steps.keys():
+            if entity == 'S':
+                color = '#00FF00'
+            else:
+                color = f'#{random.randint(0, 0xFFFFFF):06x}'
+            self.array_color[entity] = color
+            self.array_color[f'{entity}_dark'] = self.darken_color(color)
+                
         
         self.entities = list(self.steps.keys())
         self.current_step = {entity: -1 for entity in self.entities}
@@ -330,11 +339,24 @@ class App:
         y0 = i * cell_size
         x1 = x0 + cell_size
         y1 = y0 + cell_size
+
+        previous_step = self.current_step[entity] - 1
+        #print(previous_step)
+        if previous_step > 0:
+            if self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][0] == 'G':
+                if entity[1:] != self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][1:]:
+                    gx_0 = self.steps[entity][previous_step][1] * cell_size
+                    gy_0 = self.steps[entity][previous_step][0] * cell_size
+                    gx_1 = gx_0 + cell_size
+                    gy_1 = gy_0 + cell_size
+                    self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill='lightcoral', outline='black')
+                    self.canvas.create_text(gx_0 + cell_size / 2, gy_0 + cell_size / 2, text=self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]], font=("Helvetica", 12))
+                    
         if len(entity) > 1:
             if self.check_override(i,j,entity):
-                self.canvas.create_rectangle(x0, y0, x1, y1, fill='#F89F5E', outline='black')
+                self.canvas.create_rectangle(x0, y0, x1, y1, fill=self.array_color[f'{entity}_dark'], outline='black')
             else:
-                self.canvas.create_rectangle(x0, y0, x1, y1, fill='#FFD1B0', outline='black')
+                self.canvas.create_rectangle(x0, y0, x1, y1, fill=self.array_color[entity], outline='black')
         else:
             if self.check_override(i,j,entity):
                 self.canvas.create_rectangle(x0, y0, x1, y1, fill='#00AA00', outline='black')
@@ -373,10 +395,23 @@ class App:
         elif self.filename[12] == '3':
             agent = PlayerLvl3(board.t, board.f)
             path = agent.move(board)
-        #else:
+        else:
         #    agent = PlayerLvl4(board)
         #    path = agent.move(board)
+            path = read_output_file('output' + self.filename[5:])
         return path
+    
+    def darken_color(self, color, factor=0.7):
+        """ Darken the given color by a specified factor. """
+        r = int(color[1:3], 16)
+        g = int(color[3:5], 16)
+        b = int(color[5:7], 16)
+        
+        r = int(r * factor)
+        g = int(g * factor)
+        b = int(b * factor)
+        
+        return f'#{r:02x}{g:02x}{b:02x}'
 
 def blend_colors(color1, color2):
     # Convert colors to RGB
