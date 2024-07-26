@@ -562,6 +562,14 @@ class PlayerLvl4:
         input: list(list()), a 2D list representing the map
         output: list((x, y)), a list of strings representing the moves on the coordinate
         """
+        """
+        idea:
+            - Hill climbing with multiple agents and random choices
+            - The main agent will move first and then the other agents will move
+            - If the time is up and the fuel is 0, return an empty dictionary
+            - The value function is a variant of Manhattan distance heuristic
+            - The value function ensure that there is always a solution if the time limit and fuel capacity are sufficient
+        """
         for _ in range(10):
             self.agents = []
             self.goals = []
