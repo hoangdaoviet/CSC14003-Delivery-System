@@ -426,11 +426,6 @@ def blend_colors(color1, color2):
         # Return the blended color as a hex string
     return f'#{r:02x}{g:02x}{b:02x}'
 
-
-        
-
-
-
 def read_input_file(filename):
     with open(filename, 'r') as f:
         lines = f.readlines()
