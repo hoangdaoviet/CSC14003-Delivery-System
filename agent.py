@@ -21,7 +21,7 @@ class PlayerLvl1:
         current_node = Node(start[0], start[1])
         frontier = deque([current_node])
         if current_node.x == goal[0] and current_node.y == goal[1]:
-            return [start]
+            return {'S': [start]}
         
         while frontier:
             current_node = frontier.popleft()            
@@ -40,7 +40,7 @@ class PlayerLvl1:
             if check:
                 break
         if check == False:
-            return -1          
+            return {}
         result = []
         while current_node:
             result.append((current_node.x, current_node.y))
@@ -67,7 +67,7 @@ class PlayerLvl1:
         stack = [current_node]
         reached = {start: current_node}
         if current_node.x == goal[0] and current_node.y == goal[1]:
-            return [start]
+            return {'S': [start]}
         x_movement = [1, -1, 0, 0]
         y_movement = [0, 0, -1, 1]
 
@@ -90,7 +90,7 @@ class PlayerLvl1:
             if check:
                 break
         if check == False:
-            return -1
+            return {}
         result = []
         while current_node:
             result.append((current_node.x, current_node.y))
@@ -130,7 +130,7 @@ class PlayerLvl1:
                         frontier.put((new_node.cost, new_node))
 
         if frontier.empty():
-            return -1
+            return {}
 
         result = []
         while current_node:
@@ -157,7 +157,7 @@ class PlayerLvl1:
         frontier = PriorityQueue()
         frontier.put(( h(current_node), current_node))
         if current_node.x == goal[0] and current_node.y == goal[1]:
-            return [start]
+            return {'S': [start]}
         
         while frontier:
             priority, current_node = frontier.get()
@@ -177,16 +177,15 @@ class PlayerLvl1:
                 break
 
         if check == False:
-            return -1
+            return {}
         
         result = []
         while current_node:
             result.append((current_node.x, current_node.y))
             current_node = current_node.parent
         return {'S': result[::-1]}
-    
-    @staticmethod
-    def AStar(board: Board):
+
+    def AStar(self, board: Board):
         goal = board.end
 
         def h(node):
@@ -219,7 +218,7 @@ class PlayerLvl1:
                         frontier.put((new_node.cost + h(new_node), new_node))
 
         if frontier.empty():
-            return -1
+            return {}
 
         result = []
         while current_node:
@@ -282,7 +281,7 @@ class PlayerLvl2:
         while True:
             res_node = self.__recursive_DLS(board, current_node, limit)
             if res_node == -1:
-                return -1
+                return {}
             if res_node == 0:
                 limit += 1
             else:
@@ -320,7 +319,8 @@ class PlayerLvl3:
             if board.isValid(x, y):
                 cell = board.board[x][y]
                 new_cost = node.cost + 1
-                new_time = node.time + (1 if cell in ['0', 'S', 'G'] else (int(cell[1:]) + 1) if cell[0] == 'F' else int(cell))
+                new_time = node.time + (1 if cell[0] in ['0', 'S', 'G'] else (int(cell[1:]) + 1) if cell[0] == 'F'
+                                                                        else int(cell))
                 new_fuel = (node.fuel - 1) if cell[0] != 'F' else self.fuelCapacity
 
                 new_node = Node(x, y, node, cost=new_cost, time=new_time, fuel=new_fuel)
@@ -379,7 +379,7 @@ class PlayerLvl3:
         goal = board.end
         res_node = self.IDS(board, start, goal)
         if res_node == -1:
-            return -1
+            return {}
 
         result = []
         while res_node:
@@ -428,21 +428,52 @@ class PlayerLvl4:
         return children
     
     def __get_next_location_hill_climbing(self, board, node, goal):
+        def update_manhattan_distance(heuristic, node, goal):
+            if node.x == goal[0]:
+                path = board.board[node.x][node.y:goal[1]:1]
+                if len(path) > 0 and ('-1' in path or 'S' in path[0]):
+                    heuristic += 2
+            elif node.y == goal[1]:
+                path = [row[node.y] for row in board.board[node.x:goal[0]:1]]
+                if len(path) > 0 and ('-1' in path or 'S' in path[0]):
+                    heuristic += 2
+
+            current = node.parent
+            while current is not None:
+                if current == node:
+                    heuristic += 1
+                current = current.parent
+
+            return heuristic
+
         def h(node):
-            return abs(node.x - goal[0]) + abs(node.y - goal[1])
+            min_heuristic = abs(node.x - goal[0]) + abs(node.y - goal[1])
+
+            min_heuristic = update_manhattan_distance(min_heuristic, node, goal)
+
+            if min_heuristic > node.fuel:
+                fuel_locations = board.get_all_fuels()
+                for location in fuel_locations:
+                    heuristic = abs(node.x - location[0]) + abs(node.y - location[1])
+                    
+                    heuristic = update_manhattan_distance(heuristic, node, location)
+
+                    if heuristic < min_heuristic:
+                        min_heuristic = heuristic
+            elif board.board[node.x][node.y][0] == 'F' and node.parent.fuel < min_heuristic - 1:
+                min_heuristic = 0
+
+            return min_heuristic
         
         children = sorted(self.__get_children(board, node), key=lambda x: h(x))
 
         num_children = len(children)
-        ratio = [0.8] + [0.2 / (num_children - 1) for _ in range(num_children - 1)]
+        ratio = [1] + [0 / (num_children - 1) for _ in range(num_children - 1)]
 
-        return np.random.choice(children, p=ratio) if num_children > 1 else children[0] if num_children != 0 else node
+        return np.random.choice(children, p=ratio) if num_children > 1 else children[0] if num_children != 0 \
+                                                                       else Node(node.x, node.y, node, node.cost, node.time + 1, node.fuel)
 
-    def move(self, board: Board):
-        """
-        input: list(list()), a 2D list representing the map
-        output: list((x, y)), a list of strings representing the moves on the coordinate
-        """
+    def multiagents_hill_climbing(self, board: Board):
         start = board.start
         end = board.end
         main_agent = Node(start[0], start[1], None, 0, 0, self.fuelCapacity)
@@ -457,26 +488,13 @@ class PlayerLvl4:
 
         cell_values = ['0' for _ in range(10)]
 
-        # check_list = []
+        stuck_count = 0
 
-        # count = 0
-
-        while True:
-            # count += 1
-            # print_list = [(main_agent.x, main_agent.y)]
-            # for i in range(len(self.agents)):
-            #     print_list.append((self.agents[i][1].x, self.agents[i][1].y))
-            # check_list.append(print_list)
-            # if count == 1000:
-            #     with open('output.txt', 'w') as f:
-            #         for row in check_list:
-            #             f.write(str(row) + '\n')
-            #     return -1
-
+        while stuck_count < self.timeAllowed - main_agent.time:
             tmp_next_location = self.__get_next_location_hill_climbing(search_board, main_agent, end)
+            if tmp_next_location.x == main_agent.x and tmp_next_location.y == main_agent.y:
+                stuck_count += 1
             if tmp_next_location.time > self.timeAllowed:
-                break
-            if search_board.board[tmp_next_location.x][tmp_next_location.y] == 'G':
                 break
 
             search_board.board[main_agent.x][main_agent.y] = cell_values[0]
@@ -485,14 +503,17 @@ class PlayerLvl4:
 
             main_agent = tmp_next_location
 
+            if main_agent.x == end[0] and main_agent.y == end[1]:
+                break
+
             for i in range(len(self.agents)):
                 current_agent = self.agents[i][1]
                 current_goal = self.goals[i][1]
                 tmp_next_location = self.__get_next_location_hill_climbing(search_board, current_agent, current_goal)
                 if tmp_next_location.time > self.timeAllowed:
                     break
-                if search_board.board[tmp_next_location.x][tmp_next_location.y] == 'G' + str(i):
-                    search_board.board[current_agent.x][current_agent.y] = 0
+                if tmp_next_location.x == current_goal[0] and tmp_next_location.y == current_goal[1]:
+                    # search_board.board[tmp_next_location.x][tmp_next_location.y] = '0'
                     
                     new_row = np.random.randint(0, search_board.n - 1)
                     new_col = np.random.randint(0, search_board.m - 1)
@@ -501,13 +522,19 @@ class PlayerLvl4:
                         new_row = np.random.randint(0, search_board.n - 1)
                         new_col = np.random.randint(0, search_board.m - 1)
 
-                    search_board.board[new_row][new_col] = 'G' + str(i)
+                    tmp_next_location.time = 0
+                    tmp_next_location.fuel = self.fuelCapacity
+                    search_board.board[new_row][new_col] = 'G' + str(i+1)
+                    self.goals[i] = (i, (new_row, new_col))
 
                 search_board.board[current_agent.x][current_agent.y] = cell_values[i + 1]
                 cell_values[i + 1] = search_board.board[tmp_next_location.x][tmp_next_location.y]
                 search_board.board[tmp_next_location.x][tmp_next_location.y] = 'S' + str(i)
 
                 self.agents[i] = (i, tmp_next_location)
+
+        if main_agent.x != end[0] or main_agent.y != end[1]:
+            return {}
 
         result = [[]]
         while main_agent:
@@ -521,4 +548,26 @@ class PlayerLvl4:
                 result[i + 1].append((current_agent.x, current_agent.y))
                 current_agent = current_agent.parent
 
-        return [{'S': result[0][::-1]}] + [{'S' + str(i): result[i + 1][::-1]} for i in range(len(self.agents))]
+        res_dict = {'S': result[0][::-1]}
+        for i in range(1, len(result)):
+            res_dict['S' + str(i)] = result[i][::-1]
+
+        for line in search_board.board:
+            print(line)
+
+        return res_dict, search_board.board
+    
+    def move(self, board):
+        """
+        input: list(list()), a 2D list representing the map
+        output: list((x, y)), a list of strings representing the moves on the coordinate
+        """
+        for _ in range(10):
+            self.agents = []
+            self.goals = []
+
+            res, search_board = self.multiagents_hill_climbing(board)
+            if res == {}:
+                continue
+            return res, search_board
+        return {}, [[]]

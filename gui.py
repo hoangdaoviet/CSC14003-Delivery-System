@@ -396,8 +396,8 @@ class App:
             agent = PlayerLvl3(board.t, board.f)
             path = agent.move(board)
         else:
-           agent = PlayerLvl4(board)
-           path = agent.move(board)
+            agent = PlayerLvl4(board.t, board.f)
+            path, search_board = agent.move(board)
             # path = read_output_file('output' + self.filename[5:])
         return path
     

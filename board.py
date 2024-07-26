@@ -34,6 +34,14 @@ class Board:
                     res[int(self.board[i][j][1:])] = (i, j)
         return sorted(res.items())
     
+    def get_all_fuels(self):
+        res = []
+        for i in range(self.n):
+            for j in range(self.m):
+                if 'F' in self.board[i][j]:
+                    res.append((i, j))
+        return res
+    
     def get_all_goals(self):
         res = {}
         for i in range(self.n):
