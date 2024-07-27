@@ -287,6 +287,8 @@ class App:
                 color = '#00FF00'
             else:
                 color = f'#{random.randint(0, 0xFFFFFF):06x}'
+                while color == '#00FF00':
+                    color = f'#{random.randint(0, 0xFFFFFF):06x}'
             self.array_color[entity] = color
             self.array_color[f'{entity}_dark'] = self.darken_color(color)
                 
@@ -348,19 +350,28 @@ class App:
                 gy_0 = self.steps[entity][previous_step][0] * cell_size
                 gx_1 = gx_0 + cell_size
                 gy_1 = gy_0 + cell_size
-                if self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][0] != '0':
+                if self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][0] == 'G':
+                    self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill='lightcoral', outline='black')
+                    self.canvas.create_text(gx_0 + cell_size / 2, gy_0 + cell_size / 2, text=self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]], font=("Helvetica", 12))
+                elif self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][0] == 'F':
+                    self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill='lightyellow', outline='black')
+                    self.canvas.create_text(gx_0 + cell_size / 2, gy_0 + cell_size / 2, text=self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]], font=("Helvetica", 12))
+                elif self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][0] == 'S':
                     self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill=self.array_color[entity], outline='black')
+                    self.canvas.create_text(gx_0 + cell_size / 2, gy_0 + cell_size / 2, text=self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]], font=("Helvetica", 12))
+                elif self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]] != '0':
+                    self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill='#ADD8E6', outline='black')
                     self.canvas.create_text(gx_0 + cell_size / 2, gy_0 + cell_size / 2, text=self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]], font=("Helvetica", 12))
                 else:
                     self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill='white', outline='black')
                     
         if len(entity) > 1:
-            if self.check_override(i,j,entity):
+            if self.check_override(i,j,entity) and self.level != 4:
                 self.canvas.create_rectangle(x0, y0, x1, y1, fill=self.array_color[f'{entity}_dark'], outline='black')
             else:
                 self.canvas.create_rectangle(x0, y0, x1, y1, fill=self.array_color[entity], outline='black')
         else:
-            if self.check_override(i,j,entity):
+            if self.check_override(i,j,entity) and self.level != 4:
                 self.canvas.create_rectangle(x0, y0, x1, y1, fill='#00AA00', outline='black')
             else:
                 self.canvas.create_rectangle(x0, y0, x1, y1, fill='#00FF00', outline='black')
