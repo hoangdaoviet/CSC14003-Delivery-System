@@ -27,6 +27,9 @@ class App:
         self.choose_algorithm_frame = tk.Frame(self.root)
         self.default_text = "Enter relative path of file..."
         self.level = 0
+
+        self.paths = None
+        self.search_board = None
         
         self.show_welcome_frame()
 
@@ -72,7 +75,12 @@ class App:
         self.button_exit = tk.Button(self.main_frame, text="Exit", command=root.quit, bg="#323232", fg="#FAFAFA", width=10, height=1, cursor="hand2")
         self.button_exit.pack(pady=(10, 40))
 
+        # Khởi tạo lại path và search_board
+        self.paths = None
+        self.search_board = None
+
     def show_main_frame(self):
+        self.current_entity_index = 0
         self.hidden_all_frame()
         self.clear_frame(self.main_frame)
         self.main_frame.pack(expand=True, anchor='center')
@@ -103,7 +111,7 @@ class App:
         self.clear_frame(self.choose_algorithm_frame)
         self.choose_algorithm_frame.pack(expand=True, anchor='center')
         
-        #print('show_choose_algorithm_frame')
+        # print('show_choose_algorithm_frame')
         self.button_choose = tk.Frame(self.choose_algorithm_frame)
         self.button_choose.pack(pady = (40,40))
 
@@ -126,21 +134,17 @@ class App:
         self.hidden_all_frame()
         self.clear_frame(self.path_frame)
         self.path_frame.pack(expand=True, anchor='center')
-
-        paths, search_board = self.get_path()
-        
-
-        if not paths:
+        if not self.paths:
             self.label_nosol = tk.Label(self.path_frame, text="No solution", font=("Helvetica", 16), fg="black")
             self.label_nosol.pack(pady=(20, 20))
         else:
             n, m, grid ,t,f= read_input_file(self.filename)
-            grid = search_board if search_board else grid
+            grid = self.search_board if self.search_board else grid
 
             canvas = Canvas(self.path_frame, width=m * 30, height=n * 30)
             canvas.pack()
 
-            self.create_grid(canvas, n, m, grid)
+            self.create_grid(canvas, n, m, grid, 30)
 
         
         # outputFilename = 'output' + self.filename[5:]
@@ -149,30 +153,30 @@ class App:
         # else:
         #     paths = read_output_file(outputFilename)
             
-            for entity, path in paths.items():
+            for entity, path in self.paths.items():
                 if entity == 'S':
                     color = '#00FF00'
+                    width = 6
                 else:
                     color = f'#{random.randint(0, 0xFFFFFF):06x}'
+                    width = 3
                 for i in range(1, len(path)):
                     x0 = path[i-1][1] * 30 + 20
                     y0 = path[i-1][0] * 30 + 20
                     x1 = path[i][1] * 30 + 20
                     y1 = path[i][0] * 30 + 20
-                    canvas.create_line(x0, y0, x1, y1, fill=color, width=2)
-                    
+                    canvas.create_line(x0, y0, x1, y1, fill=color, width=width)
+
         button_back = tk.Button(self.path_frame, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         button_back.pack(pady=10)
 
     def set_algorithm_level1(self, algorithm):
         self.algorithm_level1 = algorithm
 
+        self.get_path()
         self.show_main_frame()
-        
-        
-    
 
-    def create_grid(self, canvas, n, m, grid, cell_size = 30):
+    def create_grid(self, canvas, n, m, grid, cell_size=40):
         for i in range(n):
             for j in range(m):
                 value = grid[i][j]
@@ -218,10 +222,11 @@ class App:
         self.filename = self.entry.get()
         if self.check_file_exists(self.filename):
             self.default_text = self.filename
-            #print(self.filename[12])
+            # print(self.filename[12])
             if self.filename[12] == '1':
                 self.show_choose_algorithm_frame()
             else:
+                self.get_path()
                 self.show_main_frame()
                 
         #self.default_text = self.filename
@@ -277,7 +282,7 @@ class App:
 
         
 
-        self.steps, search_board = self.get_path()
+        self.steps = self.paths
         # outputFilename = 'output' + self.filename[5:]
         # if self.filename[12] == '1':
         #     self.steps = read_output_file_level1(outputFilename, self.algorithm_level1)
@@ -394,34 +399,34 @@ class App:
         if self.filename[12] == '1':
             agent = PlayerLvl1()
             if self.algorithm_level1 == 'BFS':
-                path = agent.BFS(board)
+                self.paths = agent.BFS(board)
             elif self.algorithm_level1 == 'DFS':
-                path = agent.DFS(board)
+                self.paths = agent.DFS(board)
             elif self.algorithm_level1 == 'UCS':
-                path = agent.UCS(board)
+                self.paths = agent.UCS(board)
             elif self.algorithm_level1 == 'GBFS':
-                path = agent.GBFS(board)
+                self.paths = agent.GBFS(board)
             elif self.algorithm_level1 == 'Astar':
-                path = agent.AStar(board)
+                self.paths = agent.AStar(board)
             self.level = 1
-            search_board = None
+            self.search_board = None
         
         elif self.filename[12] == '2':
             agent = PlayerLvl2(board.t)
-            path = agent.move(board)
+            self.paths = agent.move(board)
             self.level = 2
-            search_board = None
+            self.search_board = None
         elif self.filename[12] == '3':
             agent = PlayerLvl3(board.t, board.f)
-            path = agent.move(board)
+            self.paths = agent.move(board)
             self.level = 3
-            search_board = None
+            self.search_board = None
         else:
             agent = PlayerLvl4(board.t, board.f)
-            path, search_board = agent.move(board)
+            self.paths, self.search_board = agent.move(board)
             self.level = 4
-            # path = read_output_file('output' + self.filename[5:])
-        return path, search_board
+            # self.paths = read_output_file('output' + self.filename[5:])
+        # return self.paths, self.search_board
     
     def darken_color(self, color, factor=0.7):
         """ Darken the given color by a specified factor. """
