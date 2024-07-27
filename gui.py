@@ -278,8 +278,10 @@ class App:
         self.back_step.pack(side = tk.LEFT, padx = (0, 5))
 
         
-        
-        self.steps = self.get_path()
+        if self.filename[12] == '4':
+            self.steps, board = self.get_path()
+        else:
+            self.steps = self.get_path()
         # outputFilename = 'output' + self.filename[5:]
         # if self.filename[12] == '1':
         #     self.steps = read_output_file_level1(outputFilename, self.algorithm_level1)
@@ -447,70 +449,70 @@ def read_input_file(filename):
 
     return n, m, grid, t, f
 
-def read_output_file(filename):
-    steps = {}
-    current_key = None
+# def read_output_file(filename):
+#     steps = {}
+#     current_key = None
 
-    with open(filename, 'r') as f:
-        lines = f.readlines()
+#     with open(filename, 'r') as f:
+#         lines = f.readlines()
 
-    for line in lines:
-        parts = line.strip()
+#     for line in lines:
+#         parts = line.strip()
 
-        # Check if this line is an entity identifier like "S", "S1", etc.
-        if re.match(r'^\w+$', parts):
-            current_key = parts
-            steps[current_key] = []
-        else:
-            # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
-            matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
-            if matches and current_key:
-                for match in matches:
-                    i, j = int(match[0]), int(match[1])
-                    steps[current_key].append((i, j))
-            else:
-                print(f"No matches found in line: {line}")
+#         # Check if this line is an entity identifier like "S", "S1", etc.
+#         if re.match(r'^\w+$', parts):
+#             current_key = parts
+#             steps[current_key] = []
+#         else:
+#             # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
+#             matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
+#             if matches and current_key:
+#                 for match in matches:
+#                     i, j = int(match[0]), int(match[1])
+#                     steps[current_key].append((i, j))
+#             else:
+#                 print(f"No matches found in line: {line}")
 
-    if not steps:
-        print("No steps parsed from the output file.")
-    else:
-        print(f"Parsed steps: {steps}")
+#     if not steps:
+#         print("No steps parsed from the output file.")
+#     else:
+#         print(f"Parsed steps: {steps}")
 
-    return steps
+#     return steps
 
-def read_output_file_level1(filename, algorithm):
-    steps = {}
-    current_key = None
+# def read_output_file_level1(filename, algorithm):
+#     steps = {}
+#     current_key = None
 
-    with open(filename, 'r') as f:
-        lines = f.readlines()
+#     with open(filename, 'r') as f:
+#         lines = f.readlines()
 
-    for i in range(len(lines)):
-        if lines[i].startswith(algorithm):
-            for j in range(i + 1, i + 3):
-                parts = lines[j].strip()
-                if parts == '-1':
-                    break
-        # Check if this line is an entity identifier like "S", "S1", etc.
-                if re.match(r'^\w+$', parts):
-                    current_key = parts
-                    steps[current_key] = []
-                else:
-                    # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
-                    matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
-                    if matches and current_key:
-                        for match in matches:
-                            i, j = int(match[0]), int(match[1])
-                            steps[current_key].append((i, j))
-                    else:
-                        print(f"No matches found in line: {lines[j]}")
+#     for i in range(len(lines)):
+#         if lines[i].startswith(algorithm):
+#             for j in range(i + 1, i + 3):
+#                 parts = lines[j].strip()
+#                 if parts == '-1':
+#                     break
+#         # Check if this line is an entity identifier like "S", "S1", etc.
+#                 if re.match(r'^\w+$', parts):
+#                     current_key = parts
+#                     steps[current_key] = []
+#                 else:
+#                     # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
+#                     matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
+#                     if matches and current_key:
+#                         for match in matches:
+#                             i, j = int(match[0]), int(match[1])
+#                             steps[current_key].append((i, j))
+#                     else:
+#                         print(f"No matches found in line: {lines[j]}")
 
-    if not steps:
-        print("No steps parsed from the output file.")
-    else:
-        print(f"Parsed steps: {steps}")
+#     if not steps:
+#         print("No steps parsed from the output file.")
+#     else:
+#         print(f"Parsed steps: {steps}")
 
-    return steps
+#     return steps
 #steps = read_output_file_level1('outputGUI1.txt', 'DFS')
 #print(steps)
 root = tk.Tk()
