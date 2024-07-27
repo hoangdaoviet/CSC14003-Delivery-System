@@ -346,7 +346,11 @@ class App:
         return False
 
     def update_grid(self, i, j, entity):
-        cell_size = 20 + 150 / (len(self.search_board) if len(self.search_board) > len(self.search_board[0]) else len(self.search_board[0]))
+        if self.search_board:
+            cell_size = 20 + 150 / (len(self.search_board) if len(self.search_board) > len(self.search_board[0]) else len(self.search_board[0]))
+        else:
+            n, m, _, _, _ = read_input_file(self.filename)
+            cell_size = 20 + 150 / (n if n > m else m)
         x0 = j * cell_size
         y0 = i * cell_size
         x1 = x0 + cell_size
