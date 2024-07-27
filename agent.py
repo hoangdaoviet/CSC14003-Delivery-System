@@ -430,11 +430,11 @@ class PlayerLvl4:
     def __get_next_location_hill_climbing(self, board, node, goal):
         def update_manhattan_distance(heuristic, node, goal):
             if node.x == goal[0]:
-                path = board.board[node.x][node.y:goal[1]:1]
+                path = board.board[node.x][node.y:goal[1]:1] if node.y < goal[1] else board.board[node.x][goal[1]:node.y:1]
                 if len(path) > 0 and ('-1' in path or 'S' in path[0]):
                     heuristic += 2
             elif node.y == goal[1]:
-                path = [row[node.y] for row in board.board[node.x:goal[0]:1]]
+                path = [row[node.y] for row in board.board[node.x:goal[0]:1]] if node.x < goal[0] else [row[node.y] for row in board.board[goal[0]:node.x:1]]
                 if len(path) > 0 and ('-1' in path or 'S' in path[0]):
                     heuristic += 2
 
