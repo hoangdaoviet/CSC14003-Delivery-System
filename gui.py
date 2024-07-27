@@ -344,8 +344,8 @@ class App:
         previous_step = self.current_step[entity] - 1
         #print(previous_step)
         if previous_step >= 0:
-            if self.level == 4 or self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][0] == 'G':
-                if self.level == 4 or entity[1:] != self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][1:]:
+            if self.level == 4 :
+                if self.level == 4 :
                     gx_0 = self.steps[entity][previous_step][1] * cell_size
                     gy_0 = self.steps[entity][previous_step][0] * cell_size
                     gx_1 = gx_0 + cell_size
