@@ -418,9 +418,8 @@ class PlayerLvl4:
             if board.isValid(x, y):
                 cell = board.board[x][y]
                 new_cost = node.cost + 1
-                new_time = node.time + (1 if cell in ['0', 'S', 'G'] else (int(cell[1:]) + 1) if cell[0] == 'F'
-                                                                     else int(cell) if 'G' not in cell
-                                                                     else int(cell[1:]))
+                new_time = node.time + (1 if cell in ['0', 'S', 'G'] or cell[0] in ['G'] else (int(cell[1:]) + 1) if cell[0] in ['F']
+                                                                                         else int(cell))
                 new_fuel = (node.fuel - 1) if cell[0] != 'F' else self.fuelCapacity
 
                 new_node = Node(x, y, node, cost=new_cost, time=new_time, fuel=new_fuel)
@@ -493,24 +492,45 @@ class PlayerLvl4:
 
         cell_values = ['0' for _ in range(10)]
 
+        stop_times = [0 for _ in range(10)]
+        
+
         while True:
-            tmp_next_location = self.__get_next_location_hill_climbing(search_board, main_agent, end)
-            if tmp_next_location.time > self.timeAllowed:
-                break
+            # for line in search_board.board:
+            #     print(line)
+            # print()
+            if stop_times[0] == 0:
+                tmp_next_location = self.__get_next_location_hill_climbing(search_board, main_agent, end)
+                stop_times[0] = tmp_next_location.time - main_agent.time - 1
 
-            search_board.board[main_agent.x][main_agent.y] = cell_values[0]
-            cell_values[0] = search_board.board[tmp_next_location.x][tmp_next_location.y]
-            search_board.board[tmp_next_location.x][tmp_next_location.y] = 'S'
+                if tmp_next_location.time > self.timeAllowed:
+                    break
 
-            main_agent = tmp_next_location
+                search_board.board[main_agent.x][main_agent.y] = cell_values[0]
+                cell_values[0] = search_board.board[tmp_next_location.x][tmp_next_location.y]
+                search_board.board[tmp_next_location.x][tmp_next_location.y] = 'S'
 
-            if main_agent.x == end[0] and main_agent.y == end[1]:
-                break
+                main_agent = tmp_next_location
+
+                if main_agent.x == end[0] and main_agent.y == end[1]:
+                    break
+            else:
+                stop_times[0] -= 1
 
             for i in range(len(self.agents)):
+                if stop_times[i + 1] > 0:
+                    stop_times[i + 1] -= 1
+                    continue
+
                 current_agent = self.agents[i][1]
                 current_goal = self.goals[i][1]
+
                 tmp_next_location = self.__get_next_location_hill_climbing(search_board, current_agent, current_goal)
+                stop_times[i + 1] = tmp_next_location.time - current_agent.time - 1
+                # print(tmp_next_location.x, tmp_next_location.y)
+                # print(search_board.board[tmp_next_location.x][tmp_next_location.y])
+                # if (main_agent.x, main_agent.y) == (tmp_next_location.x, tmp_next_location.y):
+                #     print(search_board.board[tmp_next_location.x][tmp_next_location.y])
                 if tmp_next_location.time > self.timeAllowed:
                     break
                 if tmp_next_location.x == current_goal[0] and tmp_next_location.y == current_goal[1]:
@@ -521,14 +541,14 @@ class PlayerLvl4:
                         new_row = np.random.randint(0, search_board.n - 1)
                         new_col = np.random.randint(0, search_board.m - 1)
 
-                    tmp_next_location.time = 0
-                    tmp_next_location.fuel = self.fuelCapacity
-                    search_board.board[new_row][new_col] = 'G' + str(i+1)
+                    # tmp_next_location.time = 0
+                    # tmp_next_location.fuel = self.fuelCapacity
+                    search_board.board[new_row][new_col] = 'G' + str(i + 1)
                     self.goals[i] = (i, (new_row, new_col))
 
                 search_board.board[current_agent.x][current_agent.y] = cell_values[i + 1]
                 cell_values[i + 1] = search_board.board[tmp_next_location.x][tmp_next_location.y]
-                search_board.board[tmp_next_location.x][tmp_next_location.y] = 'S' + str(i)
+                search_board.board[tmp_next_location.x][tmp_next_location.y] = 'S' + str(i + 1)
 
                 self.agents[i] = (i, tmp_next_location)
 
@@ -538,6 +558,9 @@ class PlayerLvl4:
         result = [[]]
         while main_agent:
             result[0].append((main_agent.x, main_agent.y))
+            if main_agent.parent:
+                for _ in range(main_agent.time - main_agent.parent.time - 1):
+                    result[0].append((main_agent.x, main_agent.y))
             main_agent = main_agent.parent
 
         for i in range(len(self.agents)):
@@ -545,6 +568,9 @@ class PlayerLvl4:
             result.append([])
             while current_agent:
                 result[i + 1].append((current_agent.x, current_agent.y))
+                if current_agent.parent:
+                    for _ in range(current_agent.time - current_agent.parent.time - 1):
+                        result[i + 1].append((current_agent.x, current_agent.y))
                 current_agent = current_agent.parent
 
         res_dict = {'S': result[0][::-1]}
@@ -581,5 +607,8 @@ class PlayerLvl4:
             res, search_board = self.__multiagents_hill_climbing(board)
             if res == {}:
                 continue
+            for key, path in res.items():
+                print(key)
+                print(path)
             return res, search_board
         return {}, [[]]
