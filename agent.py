@@ -496,9 +496,6 @@ class PlayerLvl4:
         
 
         while True:
-            # for line in search_board.board:
-            #     print(line)
-            # print()
             if stop_times[0] == 0:
                 tmp_next_location = self.__get_next_location_hill_climbing(search_board, main_agent, end)
                 stop_times[0] = tmp_next_location.time - main_agent.time - 1
@@ -527,12 +524,10 @@ class PlayerLvl4:
 
                 tmp_next_location = self.__get_next_location_hill_climbing(search_board, current_agent, current_goal)
                 stop_times[i + 1] = tmp_next_location.time - current_agent.time - 1
-                # print(tmp_next_location.x, tmp_next_location.y)
-                # print(search_board.board[tmp_next_location.x][tmp_next_location.y])
-                # if (main_agent.x, main_agent.y) == (tmp_next_location.x, tmp_next_location.y):
-                #     print(search_board.board[tmp_next_location.x][tmp_next_location.y])
+                
                 if tmp_next_location.time > self.timeAllowed:
                     break
+                
                 if tmp_next_location.x == current_goal[0] and tmp_next_location.y == current_goal[1]:
                     new_row = np.random.randint(0, search_board.n - 1)
                     new_col = np.random.randint(0, search_board.m - 1)
@@ -541,8 +536,6 @@ class PlayerLvl4:
                         new_row = np.random.randint(0, search_board.n - 1)
                         new_col = np.random.randint(0, search_board.m - 1)
 
-                    # tmp_next_location.time = 0
-                    # tmp_next_location.fuel = self.fuelCapacity
                     search_board.board[new_row][new_col] = 'G' + str(i + 1)
                     self.goals[i] = (i, (new_row, new_col))
 
@@ -607,8 +600,5 @@ class PlayerLvl4:
             res, search_board = self.__multiagents_hill_climbing(board)
             if res == {}:
                 continue
-            for key, path in res.items():
-                print(key)
-                print(path)
             return res, search_board
         return {}, [[]]

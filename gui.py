@@ -344,20 +344,16 @@ class App:
         previous_step = self.current_step[entity] - 1
         #print(previous_step)
         if previous_step >= 0:
-            if self.level == 4 :
-                if self.level == 4 :
-                    gx_0 = self.steps[entity][previous_step][1] * cell_size
-                    gy_0 = self.steps[entity][previous_step][0] * cell_size
-                    gx_1 = gx_0 + cell_size
-                    gy_1 = gy_0 + cell_size
-                    if (self.level != 4):
-                        self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill='lightcoral', outline='black')
-                        self.canvas.create_text(gx_0 + cell_size / 2, gy_0 + cell_size / 2, text=self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]], font=("Helvetica", 12))
-                    elif self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][0] != '0':
-                        self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill=self.array_color[entity], outline='black')
-                        self.canvas.create_text(gx_0 + cell_size / 2, gy_0 + cell_size / 2, text=self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]], font=("Helvetica", 12))
-                    else:
-                        self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill='white', outline='black')
+            if self.level == 4:
+                gx_0 = self.steps[entity][previous_step][1] * cell_size
+                gy_0 = self.steps[entity][previous_step][0] * cell_size
+                gx_1 = gx_0 + cell_size
+                gy_1 = gy_0 + cell_size
+                if self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][0] != '0':
+                    self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill=self.array_color[entity], outline='black')
+                    self.canvas.create_text(gx_0 + cell_size / 2, gy_0 + cell_size / 2, text=self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]], font=("Helvetica", 12))
+                else:
+                    self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill='white', outline='black')
                     
         if len(entity) > 1:
             if self.check_override(i,j,entity):
