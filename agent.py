@@ -419,7 +419,7 @@ class PlayerLvl4:
                 cell = board.board[x][y]
                 new_cost = node.cost + 1
                 new_time = node.time + (1 if cell in ['0', 'S', 'G'] or cell[0] in ['G'] else (int(cell[1:]) + 1) if cell[0] in ['F']
-                                                                                         else int(cell))
+                                                                                         else int(cell) + 1)
                 new_fuel = (node.fuel - 1) if cell[0] != 'F' else self.fuelCapacity
 
                 new_node = Node(x, y, node, cost=new_cost, time=new_time, fuel=new_fuel)
