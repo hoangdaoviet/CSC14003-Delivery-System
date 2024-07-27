@@ -516,7 +516,7 @@ class PlayerLvl4:
                     new_row = np.random.randint(0, search_board.n - 1)
                     new_col = np.random.randint(0, search_board.m - 1)
 
-                    while search_board.board[new_row][new_col] in ['S', 'G', '-1'] or 'G' in search_board.board[new_row][new_col]:
+                    while '0' not in search_board.board[new_row][new_col]:
                         new_row = np.random.randint(0, search_board.n - 1)
                         new_col = np.random.randint(0, search_board.m - 1)
 
@@ -549,6 +549,13 @@ class PlayerLvl4:
         res_dict = {'S': result[0][::-1]}
         for i in range(1, len(result)):
             res_dict['S' + str(i)] = result[i][::-1]
+
+        for key in res_dict.keys():
+            search_board.board[res_dict[key][0][0]][res_dict[key][0][1]] = key
+            if key == 'S':
+                search_board.board[end[0]][end[1]] = 'G'
+            else:
+                search_board.board[res_dict[key][-1][0]][res_dict[key][-1][1]] = cell_values[int(key[1:])]
 
         return res_dict, search_board.board
     
