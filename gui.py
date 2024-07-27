@@ -103,7 +103,7 @@ class App:
         self.clear_frame(self.choose_algorithm_frame)
         self.choose_algorithm_frame.pack(expand=True, anchor='center')
         
-        print('show_choose_algorithm_frame')
+        #print('show_choose_algorithm_frame')
         self.button_choose = tk.Frame(self.choose_algorithm_frame)
         self.button_choose.pack(pady = (40,40))
 
@@ -128,13 +128,19 @@ class App:
         self.path_frame.pack(expand=True, anchor='center')
 
         paths, search_board = self.get_path()
-        n, m, grid ,t,f= read_input_file(self.filename)
-        grid = search_board if search_board else grid
+        
 
-        canvas = Canvas(self.path_frame, width=m * 40, height=n * 40)
-        canvas.pack()
+        if not paths:
+            self.label_nosol = tk.Label(self.path_frame, text="No solution", font=("Helvetica", 16), fg="black")
+            self.label_nosol.pack(pady=(20, 20))
+        else:
+            n, m, grid ,t,f= read_input_file(self.filename)
+            grid = search_board if search_board else grid
 
-        self.create_grid(canvas, n, m, grid)
+            canvas = Canvas(self.path_frame, width=m * 30, height=n * 30)
+            canvas.pack()
+
+            self.create_grid(canvas, n, m, grid)
 
         
         # outputFilename = 'output' + self.filename[5:]
@@ -142,8 +148,6 @@ class App:
         #     paths = read_output_file_level1(outputFilename, self.algorithm_level1)
         # else:
         #     paths = read_output_file(outputFilename)
-
-        if paths:
             
             for entity, path in paths.items():
                 if entity == 'S':
@@ -151,14 +155,12 @@ class App:
                 else:
                     color = f'#{random.randint(0, 0xFFFFFF):06x}'
                 for i in range(1, len(path)):
-                    x0 = path[i-1][1] * 40 + 20
-                    y0 = path[i-1][0] * 40 + 20
-                    x1 = path[i][1] * 40 + 20
-                    y1 = path[i][0] * 40 + 20
+                    x0 = path[i-1][1] * 30 + 20
+                    y0 = path[i-1][0] * 30 + 20
+                    x1 = path[i][1] * 30 + 20
+                    y1 = path[i][0] * 30 + 20
                     canvas.create_line(x0, y0, x1, y1, fill=color, width=2)
-
-                
-
+                    
         button_back = tk.Button(self.path_frame, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
         button_back.pack(pady=10)
 
@@ -170,7 +172,7 @@ class App:
         
     
 
-    def create_grid(self, canvas, n, m, grid, cell_size=40):
+    def create_grid(self, canvas, n, m, grid, cell_size = 30):
         for i in range(n):
             for j in range(m):
                 value = grid[i][j]
@@ -216,7 +218,7 @@ class App:
         self.filename = self.entry.get()
         if self.check_file_exists(self.filename):
             self.default_text = self.filename
-            print(self.filename[12])
+            #print(self.filename[12])
             if self.filename[12] == '1':
                 self.show_choose_algorithm_frame()
             else:
@@ -251,7 +253,7 @@ class App:
 
                 self.label = tk.Label(self.input_frame, textvariable= fuel_var, font=("Helvetica", 14), fg="black")
                 self.label.pack(pady=(5, 5))
-        cell_size = 40
+        cell_size = 30
         canvas = Canvas(self.input_frame, width=m * cell_size, height=n * cell_size)
         canvas.pack()
         
@@ -297,14 +299,14 @@ class App:
         self.entities = list(self.steps.keys())
         self.current_step = {entity: -1 for entity in self.entities}
 
-        print(f"Entities: {self.entities}")
+        #print(f"Entities: {self.entities}")
         
         n, m, self.grid,t,f= read_input_file(self.filename)
         if not self.entities:
             self.label = tk.Label(self.step_by_step_frame, text="No solution", font=("Helvetica", 16), fg="black")
             self.label.pack(pady=(20, 20))
         else:
-            cell_size = 40
+            cell_size = 30
             self.canvas = Canvas(self.step_by_step_frame, width=m * cell_size, height=n * cell_size)
             self.canvas.pack()
 
@@ -337,7 +339,7 @@ class App:
         return False
 
     def update_grid(self, i, j, entity):
-        cell_size = 40
+        cell_size = 30
         x0 = j * cell_size
         y0 = i * cell_size
         x1 = x0 + cell_size

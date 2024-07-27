@@ -114,7 +114,7 @@ class PlayerLvl1:
 
         while not frontier.empty():
             current_node = frontier.get()[1]
-            print(current_node.x, current_node.y)
+            #print(current_node.x, current_node.y)
 
             if board.board[current_node.x][current_node.y] == 'G':
                 break
