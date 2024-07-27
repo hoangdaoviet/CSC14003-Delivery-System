@@ -126,6 +126,7 @@ class App:
         self.Astar_button = tk.Button(self.button_choose, text="A*", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=lambda:self.set_algorithm_level1('Astar'))
         self.Astar_button.pack(pady=(5, 5))
 
+        self.default_text = "Enter relative path of file..."
         self.back = tk.Button(self.button_choose, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_welcome_frame)
         self.back.pack(pady=(5, 5))
         
@@ -426,8 +427,8 @@ class App:
             agent = PlayerLvl4(board.t, board.f)
             self.paths, self.search_board = agent.move(board)
             self.level = 4
-            # self.paths = read_output_file('output' + self.filename[5:])
-        # return self.paths, self.search_board
+
+        write_output_file('output' + self.filename[5:], self.level, self.paths, board)
     
     def darken_color(self, color, factor=0.7):
         """ Darken the given color by a specified factor. """
@@ -469,72 +470,25 @@ def read_input_file(filename):
 
     return n, m, grid, t, f
 
-# def read_output_file(filename):
-#     steps = {}
-#     current_key = None
+def write_output_file(filename, level, paths = None, board = None):
+    with open(filename, 'w') as f:
+        if level == 1:
+            agent = PlayerLvl1()
+            algorithm = [agent.BFS, agent.DFS, agent.UCS, agent.GBFS, agent.AStar]
+            algorithm_name = ['BFS', 'DFS', 'UCS', 'GBFS', 'A*']
+            for i in range(5):
+                if i != 0:
+                    f.write('\n')
+                paths = algorithm[i](board)
+                f.write(f'{algorithm_name[i]}\n')
+                f.write('\n'.join(f"{entity}\n{' '.join(map(str, path))}" for entity, path in paths.items()))
+        elif level == 2:
+            f.write('\n'.join(f"{entity}\n{' '.join(map(str, path))}" for entity, path in paths.items()))
+        elif level == 3:
+            f.write('\n'.join(f"{entity}\n{' '.join(map(str, path))}" for entity, path in paths.items()))
+        else:
+            f.write('\n'.join(f"{entity}\n{' '.join(map(str, path))}" for entity, path in paths.items()))
 
-#     with open(filename, 'r') as f:
-#         lines = f.readlines()
-
-#     for line in lines:
-#         parts = line.strip()
-
-#         # Check if this line is an entity identifier like "S", "S1", etc.
-#         if re.match(r'^\w+$', parts):
-#             current_key = parts
-#             steps[current_key] = []
-#         else:
-#             # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
-#             matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
-#             if matches and current_key:
-#                 for match in matches:
-#                     i, j = int(match[0]), int(match[1])
-#                     steps[current_key].append((i, j))
-#             else:
-#                 print(f"No matches found in line: {line}")
-
-#     if not steps:
-#         print("No steps parsed from the output file.")
-#     else:
-#         print(f"Parsed steps: {steps}")
-
-#     return steps
-
-# def read_output_file_level1(filename, algorithm):
-#     steps = {}
-#     current_key = None
-
-#     with open(filename, 'r') as f:
-#         lines = f.readlines()
-
-#     for i in range(len(lines)):
-#         if lines[i].startswith(algorithm):
-#             for j in range(i + 1, i + 3):
-#                 parts = lines[j].strip()
-#                 if parts == '-1':
-#                     break
-#         # Check if this line is an entity identifier like "S", "S1", etc.
-#                 if re.match(r'^\w+$', parts):
-#                     current_key = parts
-#                     steps[current_key] = []
-#                 else:
-#                     # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
-#                     matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
-#                     if matches and current_key:
-#                         for match in matches:
-#                             i, j = int(match[0]), int(match[1])
-#                             steps[current_key].append((i, j))
-#                     else:
-#                         print(f"No matches found in line: {lines[j]}")
-
-#     if not steps:
-#         print("No steps parsed from the output file.")
-#     else:
-#         print(f"Parsed steps: {steps}")
-
-#     return steps
-#steps = read_output_file_level1('outputGUI1.txt', 'DFS')
-#print(steps)
 root = tk.Tk()
 app = App(root)
 root.mainloop()
