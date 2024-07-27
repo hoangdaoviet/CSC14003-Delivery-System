@@ -26,6 +26,7 @@ class App:
         self.step_by_step_frame = tk.Frame(self.root)
         self.choose_algorithm_frame = tk.Frame(self.root)
         self.default_text = "Enter relative path of file..."
+        self.level = 0
         
         self.show_welcome_frame()
 
@@ -126,20 +127,15 @@ class App:
         self.hidden_all_frame()
         self.clear_frame(self.path_frame)
         self.path_frame.pack(expand=True, anchor='center')
-        
-        if self.filename[12] == '4':
-            paths, board = self.get_path()
-        else:
-            paths = self.get_path()
+
         n, m, grid ,t,f= read_input_file(self.filename)
-        if self.filename[12] == '4':
-            grid = board
+
         canvas = Canvas(self.path_frame, width=m * 40, height=n * 40)
         canvas.pack()
 
         self.create_grid(canvas, n, m, grid)
 
-        
+        paths = self.get_path()
         
         # outputFilename = 'output' + self.filename[5:]
         # if self.filename[12] == '1':
@@ -278,10 +274,8 @@ class App:
         self.back_step.pack(side = tk.LEFT, padx = (0, 5))
 
         
-        if self.filename[12] == '4':
-            self.steps, board = self.get_path()
-        else:
-            self.steps = self.get_path()
+
+        self.steps = self.get_path()
         # outputFilename = 'output' + self.filename[5:]
         # if self.filename[12] == '1':
         #     self.steps = read_output_file_level1(outputFilename, self.algorithm_level1)
@@ -350,14 +344,20 @@ class App:
         previous_step = self.current_step[entity] - 1
         #print(previous_step)
         if previous_step > 0:
-            if self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][0] == 'G':
-                if entity[1:] != self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][1:]:
+            if self.level == 4 or self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][0] == 'G':
+                if self.level == 4 or entity[1:] != self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][1:]:
                     gx_0 = self.steps[entity][previous_step][1] * cell_size
                     gy_0 = self.steps[entity][previous_step][0] * cell_size
                     gx_1 = gx_0 + cell_size
                     gy_1 = gy_0 + cell_size
-                    self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill='lightcoral', outline='black')
-                    self.canvas.create_text(gx_0 + cell_size / 2, gy_0 + cell_size / 2, text=self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]], font=("Helvetica", 12))
+                    if (self.level != 4):
+                        self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill='lightcoral', outline='black')
+                        self.canvas.create_text(gx_0 + cell_size / 2, gy_0 + cell_size / 2, text=self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]], font=("Helvetica", 12))
+                    elif self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][0] != '0':
+                        self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill=self.array_color[entity], outline='black')
+                        self.canvas.create_text(gx_0 + cell_size / 2, gy_0 + cell_size / 2, text=self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]], font=("Helvetica", 12))
+                    else:
+                        self.canvas.create_rectangle(gx_0, gy_0, gx_1, gy_1, fill='white', outline='black')
                     
         if len(entity) > 1:
             if self.check_override(i,j,entity):
@@ -394,19 +394,22 @@ class App:
                 path = agent.GBFS(board)
             elif self.algorithm_level1 == 'Astar':
                 path = agent.AStar(board)
+            self.level = 1
         
         
         elif self.filename[12] == '2':
             agent = PlayerLvl2(board.t)
             path = agent.move(board)
+            self.level = 2
         elif self.filename[12] == '3':
             agent = PlayerLvl3(board.t, board.f)
             path = agent.move(board)
+            self.level = 3
         else:
             agent = PlayerLvl4(board.t, board.f)
             path, search_board = agent.move(board)
+            self.level = 4
             # path = read_output_file('output' + self.filename[5:])
-            return path, search_board
         return path
     
     def darken_color(self, color, factor=0.7):
@@ -449,70 +452,70 @@ def read_input_file(filename):
 
     return n, m, grid, t, f
 
-# def read_output_file(filename):
-#     steps = {}
-#     current_key = None
+def read_output_file(filename):
+    steps = {}
+    current_key = None
 
-#     with open(filename, 'r') as f:
-#         lines = f.readlines()
+    with open(filename, 'r') as f:
+        lines = f.readlines()
 
-#     for line in lines:
-#         parts = line.strip()
+    for line in lines:
+        parts = line.strip()
 
-#         # Check if this line is an entity identifier like "S", "S1", etc.
-#         if re.match(r'^\w+$', parts):
-#             current_key = parts
-#             steps[current_key] = []
-#         else:
-#             # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
-#             matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
-#             if matches and current_key:
-#                 for match in matches:
-#                     i, j = int(match[0]), int(match[1])
-#                     steps[current_key].append((i, j))
-#             else:
-#                 print(f"No matches found in line: {line}")
+        # Check if this line is an entity identifier like "S", "S1", etc.
+        if re.match(r'^\w+$', parts):
+            current_key = parts
+            steps[current_key] = []
+        else:
+            # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
+            matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
+            if matches and current_key:
+                for match in matches:
+                    i, j = int(match[0]), int(match[1])
+                    steps[current_key].append((i, j))
+            else:
+                print(f"No matches found in line: {line}")
 
-#     if not steps:
-#         print("No steps parsed from the output file.")
-#     else:
-#         print(f"Parsed steps: {steps}")
+    if not steps:
+        print("No steps parsed from the output file.")
+    else:
+        print(f"Parsed steps: {steps}")
 
-#     return steps
+    return steps
 
-# def read_output_file_level1(filename, algorithm):
-#     steps = {}
-#     current_key = None
+def read_output_file_level1(filename, algorithm):
+    steps = {}
+    current_key = None
 
-#     with open(filename, 'r') as f:
-#         lines = f.readlines()
+    with open(filename, 'r') as f:
+        lines = f.readlines()
 
-#     for i in range(len(lines)):
-#         if lines[i].startswith(algorithm):
-#             for j in range(i + 1, i + 3):
-#                 parts = lines[j].strip()
-#                 if parts == '-1':
-#                     break
-#         # Check if this line is an entity identifier like "S", "S1", etc.
-#                 if re.match(r'^\w+$', parts):
-#                     current_key = parts
-#                     steps[current_key] = []
-#                 else:
-#                     # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
-#                     matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
-#                     if matches and current_key:
-#                         for match in matches:
-#                             i, j = int(match[0]), int(match[1])
-#                             steps[current_key].append((i, j))
-#                     else:
-#                         print(f"No matches found in line: {lines[j]}")
+    for i in range(len(lines)):
+        if lines[i].startswith(algorithm):
+            for j in range(i + 1, i + 3):
+                parts = lines[j].strip()
+                if parts == '-1':
+                    break
+        # Check if this line is an entity identifier like "S", "S1", etc.
+                if re.match(r'^\w+$', parts):
+                    current_key = parts
+                    steps[current_key] = []
+                else:
+                    # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
+                    matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
+                    if matches and current_key:
+                        for match in matches:
+                            i, j = int(match[0]), int(match[1])
+                            steps[current_key].append((i, j))
+                    else:
+                        print(f"No matches found in line: {lines[j]}")
 
-#     if not steps:
-#         print("No steps parsed from the output file.")
-#     else:
-#         print(f"Parsed steps: {steps}")
+    if not steps:
+        print("No steps parsed from the output file.")
+    else:
+        print(f"Parsed steps: {steps}")
 
-#     return steps
+    return steps
 #steps = read_output_file_level1('outputGUI1.txt', 'DFS')
 #print(steps)
 root = tk.Tk()

@@ -551,12 +551,12 @@ class PlayerLvl4:
         for i in range(1, len(result)):
             res_dict['S' + str(i)] = result[i][::-1]
 
-        for key in res_dict.keys():
-            search_board.board[res_dict[key][0][0]][res_dict[key][0][1]] = key
+        for key, path in res_dict.items():
+            search_board.board[path[0][0]][path[0][1]] = key
             if key == 'S':
                 search_board.board[end[0]][end[1]] = 'G'
             else:
-                search_board.board[res_dict[key][-1][0]][res_dict[key][-1][1]] = cell_values[int(key[1:])]
+                search_board.board[path[-1][0]][path[-1][1]] = cell_values[int(key[1:])]
 
         return res_dict, search_board.board
     
