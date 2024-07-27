@@ -9,7 +9,7 @@ from agent import *
 class App:
     def __init__(self, root):
         self.root = root
-        self.root.geometry('600x600')
+        self.root.geometry('1080x720')
         self.root.title("Search project")
         self.filename = ''
         self.algorithm_level1 = ''
@@ -139,12 +139,13 @@ class App:
             self.label_nosol.pack(pady=(20, 20))
         else:
             n, m, grid ,t,f= read_input_file(self.filename)
+            cell_size = 20 + 150 / (n if n > m else m)
             grid = self.search_board if self.search_board else grid
 
-            canvas = Canvas(self.path_frame, width=m * 30, height=n * 30)
+            canvas = Canvas(self.path_frame, width=m * cell_size, height=n * cell_size)
             canvas.pack()
 
-            self.create_grid(canvas, n, m, grid, 30)
+            self.create_grid(canvas, n, m, grid, cell_size)
 
         
         # outputFilename = 'output' + self.filename[5:]
@@ -161,10 +162,10 @@ class App:
                     color = f'#{random.randint(0, 0xFFFFFF):06x}'
                     width = 3
                 for i in range(1, len(path)):
-                    x0 = path[i-1][1] * 30 + 20
-                    y0 = path[i-1][0] * 30 + 20
-                    x1 = path[i][1] * 30 + 20
-                    y1 = path[i][0] * 30 + 20
+                    x0 = path[i-1][1] * cell_size + 20
+                    y0 = path[i-1][0] * cell_size + 20
+                    x1 = path[i][1] * cell_size + 20
+                    y1 = path[i][0] * cell_size + 20
                     canvas.create_line(x0, y0, x1, y1, fill=color, width=width)
 
         button_back = tk.Button(self.path_frame, text="Back", command=self.show_main_frame, bg="#323232", fg="#FAFAFA", width=30, height=1, cursor="hand2")
@@ -258,7 +259,7 @@ class App:
 
                 self.label = tk.Label(self.input_frame, textvariable= fuel_var, font=("Helvetica", 14), fg="black")
                 self.label.pack(pady=(5, 5))
-        cell_size = 30
+        cell_size = 20 + 150 / (n if n > m else m)
         canvas = Canvas(self.input_frame, width=m * cell_size, height=n * cell_size)
         canvas.pack()
         
@@ -311,7 +312,7 @@ class App:
             self.label = tk.Label(self.step_by_step_frame, text="No solution", font=("Helvetica", 16), fg="black")
             self.label.pack(pady=(20, 20))
         else:
-            cell_size = 30
+            cell_size = 20 + 150 / (n if n > m else m)
             self.canvas = Canvas(self.step_by_step_frame, width=m * cell_size, height=n * cell_size)
             self.canvas.pack()
 
@@ -344,7 +345,7 @@ class App:
         return False
 
     def update_grid(self, i, j, entity):
-        cell_size = 30
+        cell_size = 20 + 150 / (len(self.search_board) if len(self.search_board) > len(self.search_board[0]) else len(self.search_board[0]))
         x0 = j * cell_size
         y0 = i * cell_size
         x1 = x0 + cell_size
