@@ -47,14 +47,6 @@ class PlayerLvl1:
             current_node = current_node.parent
         return {'S': result[::-1]}
 
-    def isCycle(self, node):
-        current = node.parent
-        while current is not None:
-            if current.x == node.x and current.y == node.y:
-                return True
-            current = current.parent
-        return False
-
     def DFS(self, board):
         """
         input: board: list(list()), a 2D list representing the map
@@ -84,7 +76,7 @@ class PlayerLvl1:
                         break
                     new_node = Node(x, y, current_node)
                 
-                    if not self.isCycle(new_node):
+                    if not new_node.isCycle(current_node):
                         stack.append(new_node)
                         reached[(x, y)] = new_node
             if check:
@@ -109,8 +101,8 @@ class PlayerLvl1:
         frontier.put((current_node.cost, current_node))
         reached = {start: current_node}
 
-        x_movement = [1, -1, 0, 0]
-        y_movement = [0, 0, -1, 1]
+        x_movement = [0, 0, -1, 1]
+        y_movement = [1, -1, 0, 0]
 
         while not frontier.empty():
             current_node = frontier.get()[1]
@@ -498,7 +490,6 @@ class PlayerLvl4:
         cell_values = ['0' for _ in range(10)]
 
         stop_times = [0 for _ in range(10)]
-        
 
         while True:
             if stop_times[0] == 0:
@@ -506,7 +497,7 @@ class PlayerLvl4:
                 stop_times[0] = tmp_next_location.time - main_agent.time - 1
 
                 if tmp_next_location.time > self.timeAllowed:
-                    break
+                    return {}, [[]]
 
                 search_board.board[main_agent.x][main_agent.y] = cell_values[0]
                 cell_values[0] = search_board.board[tmp_next_location.x][tmp_next_location.y]
@@ -531,7 +522,7 @@ class PlayerLvl4:
                 stop_times[i + 1] = tmp_next_location.time - current_agent.time - 1
                 
                 if tmp_next_location.time > self.timeAllowed:
-                    break
+                    continue
                 
                 if tmp_next_location.x == current_goal[0] and tmp_next_location.y == current_goal[1]:
                     new_row = np.random.randint(0, search_board.n - 1)
@@ -550,8 +541,6 @@ class PlayerLvl4:
 
                 self.agents[i] = (i, tmp_next_location)
 
-        if main_agent.x != end[0] or main_agent.y != end[1]:
-            return {}, [[]]
 
         result = [[]]
         while main_agent:
