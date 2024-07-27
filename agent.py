@@ -329,8 +329,8 @@ class PlayerLvl3:
 
         return children
 
-    def __recursive_DLS(self, board, node, limit, goal):
-        if (node.x, node.y) == (goal[0], goal[1]):
+    def __recursive_DLS(self, board, node, limit):
+        if board.board[node.x][node.y] == 'G':
             return node
         elif limit == 0:
             return 0
@@ -340,7 +340,7 @@ class PlayerLvl3:
             for child in self.__get_children(board, node):
                 if child.time > self.timeAllowed:
                     continue
-                result = self.__recursive_DLS(board, child, limit - 1, goal)
+                result = self.__recursive_DLS(board, child, limit - 1)
 
                 if result == 0:
                     cutoff_occurred = True
@@ -351,19 +351,6 @@ class PlayerLvl3:
                 return 0
             return -1
     
-    def __IDS(self, board, start, goal):
-        current_node = Node(start[0], start[1], None, 0, 0, self.fuelCapacity)
-        limit = 1
-
-        while True:
-            res_node = self.__recursive_DLS(board, current_node, limit, goal)
-            if res_node == -1:
-                return -1
-            if res_node == 0:
-                limit += 1
-            else:
-                return res_node
-
     def move(self, board):
         """
         input: list(list()), a 2D list representing the map
@@ -375,12 +362,18 @@ class PlayerLvl3:
             - Allow cycles in the path since we can limit the loop by the fuel capacity and the time limit
             - Even if the fuel can be refilled infinitely, the time limit is always finite so the loop will eventually stop
         """
-
         start = board.start
-        goal = board.end
-        res_node = self.__IDS(board, start, goal)
-        if res_node == -1:
-            return {}
+        current_node = Node(start[0], start[1], None, 0, 0, self.fuelCapacity)
+        limit = 1
+
+        while True:
+            res_node = self.__recursive_DLS(board, current_node, limit)
+            if res_node == -1:
+                return {}
+            if res_node == 0:
+                limit += 1
+            else:
+                break
 
         result = []
         while res_node:
