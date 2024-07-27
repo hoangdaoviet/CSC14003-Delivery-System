@@ -6,7 +6,7 @@ import numpy as np
 import time
 
 class PlayerLvl1:
-    def BFS(self, board: Board):
+    def BFS(self, board):
         """
         input: board: list(list()), a 2D list representing the map
         output: result: list((x, y)), a list of strings representing the moves on the coordinate
@@ -47,7 +47,7 @@ class PlayerLvl1:
             current_node = current_node.parent
         return {'S': result[::-1]}
 
-    def isCycle(self, node: Node):
+    def isCycle(self, node):
         current = node.parent
         while current is not None:
             if current.x == node.x and current.y == node.y:
@@ -97,7 +97,7 @@ class PlayerLvl1:
             current_node = current_node.parent
         return {'S': result[::-1]}
     
-    def UCS(self, board: Board):
+    def UCS(self, board):
         """
         input: board: list(list()), a 2D list representing the map
         output: result: list((x, y)), a list of strings representing the moves on the coordinate
@@ -160,7 +160,7 @@ class PlayerLvl1:
             return {'S': [start]}
         
         while frontier:
-            priority, current_node = frontier.get()
+            _, current_node = frontier.get()
             check = False
             for i in range(4):
                 x = current_node.x + x_movement[i]
@@ -185,7 +185,7 @@ class PlayerLvl1:
             current_node = current_node.parent
         return {'S': result[::-1]}
 
-    def AStar(self, board: Board):
+    def AStar(self, board):
         goal = board.end
 
         def h(node):
@@ -350,7 +350,7 @@ class PlayerLvl3:
                 return 0
             return -1
     
-    def IDS(self, board, start, goal):
+    def __IDS(self, board, start, goal):
         current_node = Node(start[0], start[1], None, 0, 0, self.fuelCapacity)
         limit = 1
 
@@ -377,7 +377,7 @@ class PlayerLvl3:
 
         start = board.start
         goal = board.end
-        res_node = self.IDS(board, start, goal)
+        res_node = self.__IDS(board, start, goal)
         if res_node == -1:
             return {}
 
@@ -438,6 +438,9 @@ class PlayerLvl4:
                 if len(path) > 0 and ('-1' in path or 'S' in path[0]):
                     heuristic += 2
 
+            if board.board[goal[0]][goal[1]][0] == 'F':
+                return heuristic
+
             current = node.parent
             while current is not None:
                 if current == node:
@@ -451,8 +454,11 @@ class PlayerLvl4:
 
             min_heuristic = update_manhattan_distance(min_heuristic, node, goal)
 
-            if min_heuristic > node.fuel:
+            if board.board[node.x][node.y][0] == 'F' and min_heuristic - 1 > node.parent.fuel:
+                min_heuristic = 0
+            elif min_heuristic - 1 > node.parent.fuel:
                 fuel_locations = board.get_all_fuels()
+
                 for location in fuel_locations:
                     heuristic = abs(node.x - location[0]) + abs(node.y - location[1])
                     
@@ -460,20 +466,18 @@ class PlayerLvl4:
 
                     if heuristic < min_heuristic:
                         min_heuristic = heuristic
-            elif board.board[node.x][node.y][0] == 'F' and node.parent.fuel < min_heuristic - 1:
-                min_heuristic = 0
 
             return min_heuristic
         
         children = sorted(self.__get_children(board, node), key=lambda x: h(x))
 
         num_children = len(children)
-        ratio = [1] + [0 / (num_children - 1) for _ in range(num_children - 1)]
+        ratio = [0.9] + [0.1 / (num_children - 1) for _ in range(num_children - 1)]
 
         return np.random.choice(children, p=ratio) if num_children > 1 else children[0] if num_children != 0 \
                                                                        else Node(node.x, node.y, node, node.cost, node.time + 1, node.fuel)
 
-    def multiagents_hill_climbing(self, board: Board):
+    def __multiagents_hill_climbing(self, board):
         start = board.start
         end = board.end
         main_agent = Node(start[0], start[1], None, 0, 0, self.fuelCapacity)
@@ -488,12 +492,8 @@ class PlayerLvl4:
 
         cell_values = ['0' for _ in range(10)]
 
-        stuck_count = 0
-
-        while stuck_count < self.timeAllowed - main_agent.time:
+        while True:
             tmp_next_location = self.__get_next_location_hill_climbing(search_board, main_agent, end)
-            if tmp_next_location.x == main_agent.x and tmp_next_location.y == main_agent.y:
-                stuck_count += 1
             if tmp_next_location.time > self.timeAllowed:
                 break
 
@@ -513,8 +513,6 @@ class PlayerLvl4:
                 if tmp_next_location.time > self.timeAllowed:
                     break
                 if tmp_next_location.x == current_goal[0] and tmp_next_location.y == current_goal[1]:
-                    # search_board.board[tmp_next_location.x][tmp_next_location.y] = '0'
-                    
                     new_row = np.random.randint(0, search_board.n - 1)
                     new_col = np.random.randint(0, search_board.m - 1)
 
@@ -534,7 +532,7 @@ class PlayerLvl4:
                 self.agents[i] = (i, tmp_next_location)
 
         if main_agent.x != end[0] or main_agent.y != end[1]:
-            return {}
+            return {}, [[]]
 
         result = [[]]
         while main_agent:
@@ -552,9 +550,6 @@ class PlayerLvl4:
         for i in range(1, len(result)):
             res_dict['S' + str(i)] = result[i][::-1]
 
-        for line in search_board.board:
-            print(line)
-
         return res_dict, search_board.board
     
     def move(self, board):
@@ -564,17 +559,18 @@ class PlayerLvl4:
         """
         """
         idea:
-            - Hill climbing with multiple agents and random choices
+            - Hill climbing variant combined with global search with multiple agents, random choices and forced movements
+            (need to move to 4 directions even if the current cell have maximum value)
             - The main agent will move first and then the other agents will move
             - If the time is up and the fuel is 0, return an empty dictionary
             - The value function is a variant of Manhattan distance heuristic
             - The value function ensure that there is always a solution if the time limit and fuel capacity are sufficient
         """
-        for _ in range(10):
+        for _ in range(30):
             self.agents = []
             self.goals = []
 
-            res, search_board = self.multiagents_hill_climbing(board)
+            res, search_board = self.__multiagents_hill_climbing(board)
             if res == {}:
                 continue
             return res, search_board
