@@ -329,7 +329,7 @@ class PlayerLvl3:
 
         return children
 
-    def __recursive_DLS(self, board, node, limit):
+    def __recursive_DLS(self, board, node, limit, check_cycle=True):
         if board.board[node.x][node.y] == 'G':
             return node
         elif limit == 0:
@@ -339,6 +339,8 @@ class PlayerLvl3:
 
             for child in self.__get_children(board, node):
                 if child.time > self.timeAllowed:
+                    continue
+                if check_cycle and child.isCycle(node):
                     continue
                 result = self.__recursive_DLS(board, child, limit - 1)
 
@@ -369,11 +371,21 @@ class PlayerLvl3:
         while True:
             res_node = self.__recursive_DLS(board, current_node, limit)
             if res_node == -1:
-                return {}
+                break
             if res_node == 0:
                 limit += 1
             else:
                 break
+
+        if res_node == -1:
+            while True:
+                res_node = self.__recursive_DLS(board, current_node, limit, check_cycle=False)
+                if res_node == -1:
+                    return {}
+                if res_node == 0:
+                    limit += 1
+                else:
+                    break
 
         result = []
         while res_node:
