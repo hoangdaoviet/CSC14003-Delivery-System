@@ -126,15 +126,20 @@ class App:
         self.hidden_all_frame()
         self.clear_frame(self.path_frame)
         self.path_frame.pack(expand=True, anchor='center')
-
+        
+        if self.filename[12] == '4':
+            paths, board = self.get_path()
+        else:
+            paths = self.get_path()
         n, m, grid ,t,f= read_input_file(self.filename)
-
+        if self.filename[12] == '4':
+            grid = board
         canvas = Canvas(self.path_frame, width=m * 40, height=n * 40)
         canvas.pack()
 
         self.create_grid(canvas, n, m, grid)
 
-        paths = self.get_path()
+        
         
         # outputFilename = 'output' + self.filename[5:]
         # if self.filename[12] == '1':
@@ -273,7 +278,7 @@ class App:
         self.back_step.pack(side = tk.LEFT, padx = (0, 5))
 
         
-
+        
         self.steps = self.get_path()
         # outputFilename = 'output' + self.filename[5:]
         # if self.filename[12] == '1':
@@ -399,6 +404,7 @@ class App:
             agent = PlayerLvl4(board.t, board.f)
             path, search_board = agent.move(board)
             # path = read_output_file('output' + self.filename[5:])
+            return path, search_board
         return path
     
     def darken_color(self, color, factor=0.7):
