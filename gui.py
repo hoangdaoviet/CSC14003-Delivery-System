@@ -72,8 +72,6 @@ class App:
         self.button_exit = tk.Button(self.main_frame, text="Exit", command=root.quit, bg="#323232", fg="#FAFAFA", width=10, height=1, cursor="hand2")
         self.button_exit.pack(pady=(10, 40))
 
-        
-
     def show_main_frame(self):
         self.hidden_all_frame()
         self.clear_frame(self.main_frame)
@@ -128,14 +126,15 @@ class App:
         self.clear_frame(self.path_frame)
         self.path_frame.pack(expand=True, anchor='center')
 
+        paths, search_board = self.get_path()
         n, m, grid ,t,f= read_input_file(self.filename)
+        grid = search_board if search_board else grid
 
         canvas = Canvas(self.path_frame, width=m * 40, height=n * 40)
         canvas.pack()
 
         self.create_grid(canvas, n, m, grid)
 
-        paths = self.get_path()
         
         # outputFilename = 'output' + self.filename[5:]
         # if self.filename[12] == '1':
@@ -275,7 +274,7 @@ class App:
 
         
 
-        self.steps = self.get_path()
+        self.steps, search_board = self.get_path()
         # outputFilename = 'output' + self.filename[5:]
         # if self.filename[12] == '1':
         #     self.steps = read_output_file_level1(outputFilename, self.algorithm_level1)
@@ -391,22 +390,24 @@ class App:
             elif self.algorithm_level1 == 'Astar':
                 path = agent.AStar(board)
             self.level = 1
-        
+            search_board = None
         
         elif self.filename[12] == '2':
             agent = PlayerLvl2(board.t)
             path = agent.move(board)
             self.level = 2
+            search_board = None
         elif self.filename[12] == '3':
             agent = PlayerLvl3(board.t, board.f)
             path = agent.move(board)
             self.level = 3
+            search_board = None
         else:
             agent = PlayerLvl4(board.t, board.f)
             path, search_board = agent.move(board)
             self.level = 4
             # path = read_output_file('output' + self.filename[5:])
-        return path
+        return path, search_board
     
     def darken_color(self, color, factor=0.7):
         """ Darken the given color by a specified factor. """
@@ -448,70 +449,70 @@ def read_input_file(filename):
 
     return n, m, grid, t, f
 
-def read_output_file(filename):
-    steps = {}
-    current_key = None
+# def read_output_file(filename):
+#     steps = {}
+#     current_key = None
 
-    with open(filename, 'r') as f:
-        lines = f.readlines()
+#     with open(filename, 'r') as f:
+#         lines = f.readlines()
 
-    for line in lines:
-        parts = line.strip()
+#     for line in lines:
+#         parts = line.strip()
 
-        # Check if this line is an entity identifier like "S", "S1", etc.
-        if re.match(r'^\w+$', parts):
-            current_key = parts
-            steps[current_key] = []
-        else:
-            # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
-            matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
-            if matches and current_key:
-                for match in matches:
-                    i, j = int(match[0]), int(match[1])
-                    steps[current_key].append((i, j))
-            else:
-                print(f"No matches found in line: {line}")
+#         # Check if this line is an entity identifier like "S", "S1", etc.
+#         if re.match(r'^\w+$', parts):
+#             current_key = parts
+#             steps[current_key] = []
+#         else:
+#             # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
+#             matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
+#             if matches and current_key:
+#                 for match in matches:
+#                     i, j = int(match[0]), int(match[1])
+#                     steps[current_key].append((i, j))
+#             else:
+#                 print(f"No matches found in line: {line}")
 
-    if not steps:
-        print("No steps parsed from the output file.")
-    else:
-        print(f"Parsed steps: {steps}")
+#     if not steps:
+#         print("No steps parsed from the output file.")
+#     else:
+#         print(f"Parsed steps: {steps}")
 
-    return steps
+#     return steps
 
-def read_output_file_level1(filename, algorithm):
-    steps = {}
-    current_key = None
+# def read_output_file_level1(filename, algorithm):
+#     steps = {}
+#     current_key = None
 
-    with open(filename, 'r') as f:
-        lines = f.readlines()
+#     with open(filename, 'r') as f:
+#         lines = f.readlines()
 
-    for i in range(len(lines)):
-        if lines[i].startswith(algorithm):
-            for j in range(i + 1, i + 3):
-                parts = lines[j].strip()
-                if parts == '-1':
-                    break
-        # Check if this line is an entity identifier like "S", "S1", etc.
-                if re.match(r'^\w+$', parts):
-                    current_key = parts
-                    steps[current_key] = []
-                else:
-                    # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
-                    matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
-                    if matches and current_key:
-                        for match in matches:
-                            i, j = int(match[0]), int(match[1])
-                            steps[current_key].append((i, j))
-                    else:
-                        print(f"No matches found in line: {lines[j]}")
+#     for i in range(len(lines)):
+#         if lines[i].startswith(algorithm):
+#             for j in range(i + 1, i + 3):
+#                 parts = lines[j].strip()
+#                 if parts == '-1':
+#                     break
+#         # Check if this line is an entity identifier like "S", "S1", etc.
+#                 if re.match(r'^\w+$', parts):
+#                     current_key = parts
+#                     steps[current_key] = []
+#                 else:
+#                     # Line is a series of coordinates, e.g., "(1, 1) (2, 1)"
+#                     matches = re.findall(r'\((\d+),\s*(\d+)\)', parts)
+#                     if matches and current_key:
+#                         for match in matches:
+#                             i, j = int(match[0]), int(match[1])
+#                             steps[current_key].append((i, j))
+#                     else:
+#                         print(f"No matches found in line: {lines[j]}")
 
-    if not steps:
-        print("No steps parsed from the output file.")
-    else:
-        print(f"Parsed steps: {steps}")
+#     if not steps:
+#         print("No steps parsed from the output file.")
+#     else:
+#         print(f"Parsed steps: {steps}")
 
-    return steps
+#     return steps
 #steps = read_output_file_level1('outputGUI1.txt', 'DFS')
 #print(steps)
 root = tk.Tk()
