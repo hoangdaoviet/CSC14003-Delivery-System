@@ -343,7 +343,7 @@ class App:
 
         previous_step = self.current_step[entity] - 1
         #print(previous_step)
-        if previous_step > 0:
+        if previous_step >= 0:
             if self.level == 4 or self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][0] == 'G':
                 if self.level == 4 or entity[1:] != self.grid[self.steps[entity][previous_step][0]][self.steps[entity][previous_step][1]][1:]:
                     gx_0 = self.steps[entity][previous_step][1] * cell_size
