@@ -57,12 +57,12 @@ class App:
 
         # Tạo entry và đặt nó trong frame con
         self.entry = tk.Entry(self.entry_frame, fg="gray", width=50, justify="left", bg="white", highlightbackground="#2F4F4F")
-        self.entry.insert(0, "Enter relative path of file...")
+        self.entry.insert(0, self.default_text)
+        self.entry.bind("<FocusIn>", self.on_entry_click)
+        self.entry.bind("<FocusOut>", self.on_entry_focus_out)
         self.entry.pack(side='left', padx=(0, 5), fill='x', expand=True)
 
 
-        self.entry.bind("<FocusIn>", self.on_entry_click)
-        self.entry.bind("<FocusOut>", self.on_entry_focus_out)
 
         # Tạo button Enter và đặt nó trong frame con
         self.button_enter_input = tk.Button(self.entry_frame, text="Enter", command=self.enter_input, bg="#323232", fg="#FAFAFA", width=10, height=1, cursor="hand2")
@@ -94,6 +94,7 @@ class App:
             self.exit_main = tk.Button(self.button_mainframe, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_choose_algorithm_frame)
             self.exit_main.pack(pady=(5, 5))
         else:
+            self.default_text = "Enter relative path of file..."
             self.exit_main = tk.Button(self.button_mainframe, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_welcome_frame)
             self.exit_main.pack(pady=(5, 5))
         
