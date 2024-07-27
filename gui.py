@@ -130,6 +130,7 @@ class App:
         self.back = tk.Button(self.button_choose, text="Back", bg="#323232", fg="#FAFAFA", width=40, height=2, cursor="hand2", command=self.show_welcome_frame)
         self.back.pack(pady=(5, 5))
         
+        write_output_file('output' + self.filename[5:], 1, self.paths, Board(self.filename))
 
     def show_path_frame(self):
         self.hidden_all_frame()
@@ -432,7 +433,8 @@ class App:
             self.paths, self.search_board = agent.move(board)
             self.level = 4
 
-        write_output_file('output' + self.filename[5:], self.level, self.paths, board)
+        if self.level != 1:
+            write_output_file('output' + self.filename[5:], self.level, self.paths, board)
     
     def darken_color(self, color, factor=0.7):
         """ Darken the given color by a specified factor. """
@@ -474,7 +476,7 @@ def read_input_file(filename):
 
     return n, m, grid, t, f
 
-def write_output_file(filename, level, paths = None, board = None):
+def write_output_file(filename, level, paths, board):
     with open(filename, 'w') as f:
         if level == 1:
             agent = PlayerLvl1()
