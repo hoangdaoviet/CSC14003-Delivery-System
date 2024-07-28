@@ -334,7 +334,7 @@ class PlayerLvl3:
                     continue
                 if check_cycle and child.isCycle(node):
                     continue
-                result = self.__recursive_DLS(board, child, limit - 1)
+                result = self.__recursive_DLS(board, child, limit - 1, check_cycle)
 
                 if result == 0:
                     cutoff_occurred = True
