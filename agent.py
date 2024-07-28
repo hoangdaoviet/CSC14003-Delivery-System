@@ -456,9 +456,9 @@ class PlayerLvl4:
 
             min_heuristic = update_manhattan_distance(min_heuristic, node, goal)
 
-            if board.board[node.x][node.y][0] == 'F' and min_heuristic - 1 > node.parent.fuel:
+            if board.board[node.x][node.y][0] == 'F' and min_heuristic > node.parent.fuel - 1:
                 min_heuristic = 0
-            elif min_heuristic - 1 > node.parent.fuel:
+            elif min_heuristic > node.parent.fuel - 1:
                 fuel_locations = board.get_all_fuels()
 
                 for location in fuel_locations:
