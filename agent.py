@@ -371,14 +371,14 @@ class PlayerLvl3:
 
         limit = 1
 
-        start_time = time.time()
+        # start_time = time.time()
         if res_node == -1:
             while True:
                 res_node = self.__recursive_DLS(board, current_node, limit, check_cycle=False)
                 if res_node == -1:
                     return {}
-                if time.time() - start_time > 60:
-                    return {}
+                # if time.time() - start_time > 60:
+                #     return {}
                 if res_node == 0:
                     limit += 1
                 else:
