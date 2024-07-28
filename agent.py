@@ -369,6 +369,8 @@ class PlayerLvl3:
             else:
                 break
 
+        limit = 1
+
         if res_node == -1:
             while True:
                 res_node = self.__recursive_DLS(board, current_node, limit, check_cycle=False)
