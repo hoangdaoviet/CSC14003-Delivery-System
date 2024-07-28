@@ -495,6 +495,7 @@ def write_output_file(filename, level, paths, board):
         else:
             f.write('\n'.join(f"{entity}\n{' '.join(map(str, path))}" for entity, path in paths.items()))
 
-root = tk.Tk()
-app = App(root)
-root.mainloop()
+if __name__ == '__main__':
+    root = tk.Tk()
+    app = App(root)
+    root.mainloop()
