@@ -24,11 +24,35 @@ class Board:
         return index, level
     
     def isValid(self, x, y):
-        return 0 <= x < self.n and 0 <= y < self.m and self.board[x][y] != '-1'
+        return 0 <= x < self.n and 0 <= y < self.m and self.board[x][y] != '-1' and 'S' not in self.board[x][y]
+    
+    def get_all_agents(self):
+        res = {}
+        for i in range(self.n):
+            for j in range(self.m):
+                if 'S' in self.board[i][j] and len(self.board[i][j]) > 1:
+                    res[int(self.board[i][j][1:])] = (i, j)
+        return sorted(res.items())
+    
+    def get_all_fuels(self):
+        res = []
+        for i in range(self.n):
+            for j in range(self.m):
+                if 'F' in self.board[i][j]:
+                    res.append((i, j))
+        return res
+    
+    def get_all_goals(self):
+        res = {}
+        for i in range(self.n):
+            for j in range(self.m):
+                if 'G' in self.board[i][j] and len(self.board[i][j]) > 1:
+                    res[int(self.board[i][j][1:])] = (i, j)
+        return sorted(res.items())
     
 class Node:
     __slots__ = ['x', 'y', 'parent', 'cost', 'time', 'fuel']
-    def __init__(self, x, y, parent=None, cost=0, time=0, fuel=0):
+    def __init__(self, x=None, y=None, parent=None, cost=0, time=0, fuel=0):
         self.x = x
         self.y = y
         self.parent = parent
@@ -37,6 +61,8 @@ class Node:
         self.fuel = fuel
 
     def __eq__(self, other):
+        if not isinstance(other, Node):
+            return False
         return self.x == other.x and self.y == other.y
 
     def __lt__(self, other):
@@ -44,3 +70,10 @@ class Node:
 
     def __hash__(self):
         return hash((self.x, self.y))
+    
+    def isCycle(self, node):
+        while node is not None:
+            if node == self:
+                return True
+            node = node.parent
+        return False
